@@ -1,0 +1,40 @@
+{
+    "id": "TestRealm",
+    "realm": "TestRealm",
+    "enabled": true,
+    "clients": [
+      {
+        "clientId": "test-client",
+        "enabled": true,
+        "protocol": "openid-connect",
+        "redirectUris": ["http://localhost:8081/*"],
+        "publicClient": true,
+        "directAccessGrantsEnabled": true
+      }
+    ],
+    "users": [
+      {
+        "username": "user1",
+        "enabled": true,
+        "credentials": [
+          {
+            "type": "password",
+            "value": "password1",
+            "temporary": false
+          }
+        ]
+      },
+      {
+        "username": "user2",
+        "enabled": true,
+        "credentials": [
+          {
+            "type": "password",
+            "value": "password2",
+            "temporary": false
+          }
+        ]
+      }
+    ]
+  }
+  

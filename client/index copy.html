@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>OAuth2 Client</title>
+</head>
+<body>
+  <h1>Benvenuto!</h1>
+  <div id="content" style="display: none;">
+    <p>Sei autenticato come <span id="username"></span></p>
+    <button onclick="logout()">Logout</button>
+  </div>
+  <script>
+    const clientId = 'test-client';
+    const redirectUri = 'http://localhost:8081';
+    const authEndpoint = 'http://localhost:8080/realms/TestRealm/protocol/openid-connect/auth';
+    const tokenEndpoint = 'http://localhost:8080/realms/TestRealm/protocol/openid-connect/token';
+    const userInfoEndpoint = 'http://localhost:8080/realms/TestRealm/protocol/openid-connect/userinfo';
+
+    function getQueryParams() {
+      const params = {};
+      window.location.search.substring(1).split('&').forEach(pair => {
+        const [key, value] = pair.split('=');
+        params[decodeURIComponent(key)] = decodeURIComponent(value);
+      });
+      return params;
+    }
+
+    function authorize() {
+      const state = Math.random().toString(36).substring(7);
+      const authUrl = `${authEndpoint}?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
+      window.location.href = authUrl;
+    }
+
+    async function fetchToken(code) {
+      const response = await fetch(tokenEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `grant_type=authorization_code&code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`
+      });
+      return response.json();
+    }
+
+    async function fetchUserInfo(accessToken) {
+      const response = await fetch(userInfoEndpoint, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      return response.json();
+    }
+
+    function logout() {
+      window.location.href = `http://localhost:8080/realms/TestRealm/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(redirectUri)}`;
+    }
+
+    async function main() {
+      const params = getQueryParams();
+      if (params.code) {
+        const tokenData = await fetchToken(params.code);
+        const userInfo = await fetchUserInfo(tokenData.access_token);
+        document.getElementById('username').textContent = userInfo.preferred_username;
+        document.getElementById('content').style.display = 'block';
+      } else {
+        authorize();
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>
