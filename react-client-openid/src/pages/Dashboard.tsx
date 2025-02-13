@@ -7,7 +7,7 @@ import UsersChart from '../components/Charts/UsersChart';
 import StatsCard from '../components/Dashboard/StatsCard';
 import UsersTable from '../components/Dashboard/UsersTable';
 import UserFilters from '../components/Dashboard/UserFilters';
-import CreateUserForm from '../components/Dashboard/CreateUserForm';
+import CreateUserModal from '../components/Dashboard/CreateUserModal';
 
 import { User, DashboardStats, UserFilters as UserFiltersType } from '../types/models';
 import { userService, dashboardService } from '../services/api';
@@ -45,6 +45,7 @@ const Dashboard = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [newUser, setNewUser] = useState({ name: '', email: '', role: '' });
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({ name: '', email: '', role: '' });
 
@@ -289,8 +290,23 @@ const Dashboard = () => {
                 }}
               />
 
-              {/* Create Form */}
-              <CreateUserForm
+              {/* Add User Button */}
+              <div className="mb-4">
+                <button 
+                  className="btn btn-primary"
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  Add New User
+                </button>
+              </div>
+
+              {/* Create User Modal */}
+              <CreateUserModal
+                isOpen={isModalOpen}
+                onClose={() => {
+                  setIsModalOpen(false);
+                  setNewUser({ name: '', email: '', role: '' });
+                }}
                 newUser={newUser}
                 onNewUserChange={(field, value) => setNewUser(prev => ({ ...prev, [field]: value }))}
                 onCreateUser={handleCreate}
