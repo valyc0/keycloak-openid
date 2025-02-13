@@ -30,7 +30,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     <>
       <div className="modal-backdrop fade show"></div>
       <div className="modal fade show" style={{ display: 'block' }}>
-        <div className="modal-dialog">
+        <div className="modal-dialog" style={{ marginTop: '100px' }}>
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title">Add New User</h5>

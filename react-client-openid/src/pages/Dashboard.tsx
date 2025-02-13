@@ -250,15 +250,20 @@ const Dashboard = () => {
   return (
     <>
       {error && <div className="alert alert-danger">{error}</div>}
-
+  
       {/* First Row: Chart and Stats */}
-      <div className="row g-2">
-        <div className="col-lg-3">
-          <UsersChart users={users} />
+      <div className="row g-2 mb-4"> {/* Aggiunto mb-4 qui */}
+        <div className="col-lg-6">
+          
+              <UsersChart users={users} />
+            </div>
+         
+       
+        <div className="col-lg-6">
+          <StatsCard stats={stats} />
         </div>
-        <StatsCard stats={stats} />
       </div>
-
+  
       {/* Users Management Table */}
       <div className="row">
         <div className="col-md-12">
@@ -289,7 +294,7 @@ const Dashboard = () => {
                   setCurrentPage(1);
                 }}
               />
-
+  
               {/* Add User Button */}
               <div className="mb-4">
                 <button 
@@ -299,7 +304,7 @@ const Dashboard = () => {
                   Add New User
                 </button>
               </div>
-
+  
               {/* Create User Modal */}
               <CreateUserModal
                 isOpen={isModalOpen}
@@ -311,7 +316,7 @@ const Dashboard = () => {
                 onNewUserChange={(field, value) => setNewUser(prev => ({ ...prev, [field]: value }))}
                 onCreateUser={handleCreate}
               />
-
+  
               {/* Users Table */}
               <UsersTable
                 users={users}
@@ -344,6 +349,7 @@ const Dashboard = () => {
       </div>
     </>
   );
+  
 };
 
 export default Dashboard;
