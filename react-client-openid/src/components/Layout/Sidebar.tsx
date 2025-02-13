@@ -25,6 +25,15 @@ const Sidebar = ({ onToggle }: SidebarProps) => {
                 <i className="menu-icon fa fa-laptop"></i>Dashboard
               </Link>
             </li>
+            <li className={isActive('/tasks') ? 'active' : ''}>
+              <Link to="/tasks" onClick={() => {
+                if (window.innerWidth < 768 && onToggle) {
+                  onToggle();
+                }
+              }}>
+                <i className="menu-icon fa fa-tasks"></i>Tasks
+              </Link>
+            </li>
             <li className={isActive('/about') ? 'active' : ''}>
               <Link to="/about" onClick={() => {
                 if (window.innerWidth < 768 && onToggle) {
