@@ -69,8 +69,10 @@ const mockApiHandler = async (config: InternalAxiosRequestConfig): Promise<Axios
         const page = Number(params.page) || 1;
         const pageSize = Number(params.pageSize) || 10;
         
-        // Apply filters
+        // Apply filters and sorting
         let filteredUsers = [...mockUsers];
+        
+        // Filtering
         if (params.name) {
           filteredUsers = filteredUsers.filter(user => 
             user.name.toLowerCase().includes(params.name.toLowerCase())
@@ -85,6 +87,23 @@ const mockApiHandler = async (config: InternalAxiosRequestConfig): Promise<Axios
           filteredUsers = filteredUsers.filter(user => 
             user.role === params.role
           );
+        }
+
+        // Sorting
+        if (params.sortBy) {
+          const sortOrder = params.sortOrder === 'desc' ? -1 : 1;
+          filteredUsers.sort((a, b) => {
+            const aValue = a[params.sortBy as keyof User];
+            const bValue = b[params.sortBy as keyof User];
+            
+            if (typeof aValue === 'string' && typeof bValue === 'string') {
+              return sortOrder * aValue.localeCompare(bValue);
+            }
+            if (typeof aValue === 'number' && typeof bValue === 'number') {
+              return sortOrder * (aValue - bValue);
+            }
+            return 0;
+          });
         }
 
         // Calculate pagination

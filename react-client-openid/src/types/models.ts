@@ -28,7 +28,12 @@ export interface PaginatedResponse<T> {
   pageSize: number;
 }
 
-export interface PaginationParams {
+export interface SortParams {
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface PaginationParams extends SortParams {
   page: number;
   pageSize: number;
 }
