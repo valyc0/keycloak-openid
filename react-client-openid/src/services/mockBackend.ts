@@ -1,12 +1,14 @@
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { mockUsers, mockTasks, getDashboardStats } from '../mockData/db';
+import { mockUsers, mockTasks, getDashboardStats, mockAlarms } from '../mockData/db';
 import { 
   User, 
   Task, 
   DashboardStats, 
   PaginationParams, 
   UserFilters,
-  PaginatedResponse 
+  PaginatedResponse,
+  Alarm,
+  AlarmFilters
 } from '../types/models';
 
 // Create axios instance
@@ -194,6 +196,97 @@ const mockApiHandler = async (config: InternalAxiosRequestConfig): Promise<Axios
         return delayResponse({ success: true });
       }
       throw new Error('Task not found');
+    }
+  }
+
+  // Alarms endpoints
+  if (path.startsWith('/alarms')) {
+    if (method?.toLowerCase() === 'get') {
+      if (path === '/alarms') {
+        // Handle pagination and filtering
+        const params = config.params || {};
+        const page = Number(params.page) || 1;
+        const pageSize = Number(params.pageSize) || 10;
+        
+        // Apply filters and sorting
+        let filteredAlarms = [...mockAlarms];
+        
+        // Filtering
+        if (params.call_type) {
+          filteredAlarms = filteredAlarms.filter(alarm => 
+            alarm.call_type === params.call_type
+          );
+        }
+        if (params.carrier) {
+          filteredAlarms = filteredAlarms.filter(alarm => 
+            alarm.carrier === params.carrier
+          );
+        }
+        if (params.call_status) {
+          filteredAlarms = filteredAlarms.filter(alarm => 
+            alarm.call_status === params.call_status
+          );
+        }
+
+        // Sorting
+        if (params.sortBy) {
+          const sortOrder = params.sortOrder === 'desc' ? -1 : 1;
+          filteredAlarms.sort((a, b) => {
+            const aValue = a[params.sortBy as keyof Alarm];
+            const bValue = b[params.sortBy as keyof Alarm];
+            
+            if (typeof aValue === 'string' && typeof bValue === 'string') {
+              return sortOrder * aValue.localeCompare(bValue);
+            }
+            if (typeof aValue === 'number' && typeof bValue === 'number') {
+              return sortOrder * (aValue - bValue);
+            }
+            return 0;
+          });
+        }
+
+        // Calculate pagination
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        const paginatedAlarms = filteredAlarms.slice(start, end);
+
+        return delayResponse<PaginatedResponse<Alarm>>({
+          data: paginatedAlarms,
+          total: filteredAlarms.length,
+          page,
+          pageSize
+        });
+      }
+      const call_id = path.split('/')[2];
+      const alarm = mockAlarms.find(a => a.call_id === call_id);
+      if (alarm) {
+        return delayResponse<Alarm>(alarm);
+      }
+      throw new Error('Alarm not found');
+    }
+    if (method?.toLowerCase() === 'post') {
+      const newAlarm: Alarm = { ...data, call_id: (Date.now()).toString() };
+      mockAlarms.push(newAlarm);
+      return delayResponse<Alarm>(newAlarm);
+    }
+    if (method?.toLowerCase() === 'put') {
+      const call_id = path.split('/')[2];
+      const index = mockAlarms.findIndex(a => a.call_id === call_id);
+      if (index !== -1) {
+        const updatedAlarm = { ...data, call_id };
+        mockAlarms[index] = updatedAlarm;
+        return delayResponse<Alarm>(updatedAlarm);
+      }
+      throw new Error('Alarm not found');
+    }
+    if (method?.toLowerCase() === 'delete') {
+      const call_id = path.split('/')[2];
+      const index = mockAlarms.findIndex(a => a.call_id === call_id);
+      if (index !== -1) {
+        mockAlarms.splice(index, 1);
+        return delayResponse({ success: true });
+      }
+      throw new Error('Alarm not found');
     }
   }
 

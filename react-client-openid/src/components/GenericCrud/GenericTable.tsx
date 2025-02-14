@@ -6,7 +6,7 @@ interface Column<T> {
   header: string;
   sortable?: boolean;
   render?: (value: T[keyof T], item: T) => React.ReactNode;
-  type?: 'text' | 'email' | 'select';
+  type?: 'text' | 'email' | 'select' | 'datetime-local';
   options?: { value: string; label: string }[];
 }
 
@@ -16,12 +16,12 @@ interface GenericTableProps<T> {
   sortBy: string;
   sortOrder: 'asc' | 'desc';
   onSort: (column: string) => void;
-  editingId: number | null;
+  editingId: number | string | null;
   editForm: Partial<T>;
   onEdit: (item: T) => void;
   onUpdate: () => void;
   onCancelEdit: () => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: number | string) => void;
   onEditFormChange: (field: string, value: string) => void;
   loading?: boolean;
   currentPage: number;
@@ -31,7 +31,7 @@ interface GenericTableProps<T> {
   onPageSizeChange: (size: number) => void;
 }
 
-const GenericTable: FC<GenericTableProps<any>> = <T extends { id: number }>({
+const GenericTable: FC<GenericTableProps<any>> = <T extends { id: number | string }>({
   items,
   columns,
   sortBy,

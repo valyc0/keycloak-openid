@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import About from './pages/About';
 import Tasks from './pages/Tasks';
+import Alarms from './pages/Alarms';
 import Layout from './components/Layout/Layout';
 import AuthProvider from './components/AuthProvider';
 import './assets/css/cs-skin-elastic.css';
@@ -63,6 +64,16 @@ function AppRoutes() {
             <ProtectedRoute>
               <Layout>
                 <Tasks />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/alarms" 
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Alarms />
               </Layout>
             </ProtectedRoute>
           } 

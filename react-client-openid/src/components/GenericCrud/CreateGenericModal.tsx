@@ -3,7 +3,7 @@ import React, { FC } from 'react';
 interface FormField {
   key: string;
   label: string;
-  type: 'text' | 'email' | 'select';
+  type: 'text' | 'email' | 'select' | 'datetime-local';
   options?: { value: string; label: string }[];
 }
 

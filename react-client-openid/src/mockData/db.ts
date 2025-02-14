@@ -1,4 +1,44 @@
-import { User, Task, DashboardStats } from '../types/models';
+import { User, Task, DashboardStats, Alarm } from '../types/models';
+
+export const mockAlarms: Alarm[] = [
+  {
+    call_id: "987654321",
+    caller_number: "+1234567890",
+    called_number: "+0987654321",
+    start_time: "2025-02-14T10:00:00Z",
+    end_time: "2025-02-14T10:15:00Z",
+    duration_seconds: 900,
+    call_type: "Internazionale",
+    carrier: "CarrierX",
+    charge_amount: 3.50,
+    call_status: "Completata"
+  },
+  {
+    call_id: "987654322",
+    caller_number: "+1234567891",
+    called_number: "+0987654322",
+    start_time: "2025-02-14T09:00:00Z",
+    end_time: "2025-02-14T09:10:00Z",
+    duration_seconds: 600,
+    call_type: "Nazionale",
+    carrier: "CarrierY",
+    charge_amount: 1.50,
+    call_status: "Completata"
+  },
+  {
+    call_id: "987654323",
+    caller_number: "+1234567892",
+    called_number: "+0987654323",
+    start_time: "2025-02-14T08:00:00Z",
+    end_time: "2025-02-14T08:05:00Z",
+    duration_seconds: 300,
+    call_type: "Locale",
+    carrier: "CarrierZ",
+    charge_amount: 0.50,
+    call_status: "Fallita"
+  }
+];
+
 
 export const mockUsers: User[] = [
   {

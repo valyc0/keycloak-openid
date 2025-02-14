@@ -43,3 +43,22 @@ export interface UserFilters {
   email?: string;
   role?: string;
 }
+
+export interface Alarm {
+  call_id: string;
+  caller_number: string;
+  called_number: string;
+  start_time: string;
+  end_time: string;
+  duration_seconds: number;
+  call_type: string;
+  carrier: string;
+  charge_amount: number;
+  call_status: string;
+}
+
+export interface AlarmFilters {
+  call_type?: string;
+  carrier?: string;
+  call_status?: string;
+}

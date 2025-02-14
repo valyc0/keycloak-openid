@@ -5,7 +5,9 @@ import {
   DashboardStats, 
   PaginationParams, 
   UserFilters,
-  PaginatedResponse 
+  PaginatedResponse,
+  Alarm,
+  AlarmFilters 
 } from '../types/models';
 
 // User services
@@ -34,4 +36,18 @@ export const taskService = {
 // Dashboard services
 export const dashboardService = {
   getStats: () => api.get<DashboardStats>('/dashboard/stats')
+};
+
+// Alarm services
+export const alarmService = {
+  getAll: (params?: PaginationParams & AlarmFilters) => 
+    api.get<PaginatedResponse<Alarm>>('/alarms', { params }),
+  getById: (id: string) => 
+    api.get<Alarm>(`/alarms/${id}`),
+  create: (alarm: Omit<Alarm, 'call_id'>) => 
+    api.post<Alarm>('/alarms', alarm),
+  update: (id: string, alarm: Omit<Alarm, 'call_id'>) => 
+    api.put<Alarm>(`/alarms/${id}`, alarm),
+  delete: (id: string) => 
+    api.delete(`/alarms/${id}`)
 };
