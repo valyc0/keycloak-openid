@@ -4,10 +4,10 @@ import { Navigate } from 'react-router-dom';
 import debounce from 'lodash/debounce';
 
 import UsersChart from '../components/Charts/UsersChart';
-import StatsCard from '../components/Dashboard/StatsCard';
-import UsersTable from '../components/Dashboard/UsersTable';
-import UserFilters from '../components/Dashboard/UserFilters';
-import CreateUserModal from '../components/Dashboard/CreateUserModal';
+import StatsCard from '../components/GenericCrud/StatsCard';
+import GenericTable from '../components/GenericCrud/GenericTable';
+import GenericFilters from '../components/GenericCrud/GenericFilters';
+import CreateGenericModal from '../components/GenericCrud/CreateGenericModal';
 
 import { User, DashboardStats, UserFilters as UserFiltersType } from '../types/models';
 import { userService, dashboardService } from '../services/api';
@@ -24,7 +24,7 @@ const Dashboard = () => {
     name: '',
     email: ''
   });
-  const [filters, setFilters] = useState<UserFiltersType>({
+  const [filters, setFilters] = useState<{ [key: string]: string }>({
     name: '',
     email: '',
     role: ''
@@ -86,7 +86,7 @@ const Dashboard = () => {
 
   // Debounced filter update
   const debouncedSetFilters = useCallback(
-    debounce((newFilters: UserFiltersType) => {
+    debounce((newFilters: { [key: string]: string }) => {
       setFilters(newFilters);
     }, 500),
     []
@@ -264,18 +264,31 @@ const Dashboard = () => {
         </div>
       </div>
   
-      {/* Users Management Table */}
+      {/* Generic Management Table */}
       <div className="row">
         <div className="col-md-12">
           <div className="card">
             <div className="card-header">
-              <strong className="card-title">Users Management</strong>
+              <strong className="card-title">Generic Management</strong>
             </div>
             <div className="card-body">
               {/* Filters */}
-              <UserFilters
+              <GenericFilters
                 searchInputs={searchInputs}
                 filters={filters}
+                filterFields={[
+                  { key: 'name', label: 'Name', type: 'text' },
+                  { key: 'email', label: 'Email', type: 'text' },
+                  { 
+                    key: 'role', 
+                    label: 'Role', 
+                    type: 'select',
+                    options: [
+                      { value: 'Admin', label: 'Admin' },
+                      { value: 'User', label: 'User' }
+                    ]
+                  }
+                ]}
                 showSuggestions={showSuggestions}
                 suggestions={suggestions}
                 onSearchInputChange={(field, value) => setSearchInputs(prev => ({ ...prev, [field]: value }))}
@@ -295,31 +308,74 @@ const Dashboard = () => {
                 }}
               />
   
-              {/* Add User Button */}
+              {/* Add Generic Button */}
               <div className="mb-4">
                 <button 
                   className="btn btn-primary"
                   onClick={() => setIsModalOpen(true)}
                 >
-                  Add New User
+                  Add New Generic
                 </button>
               </div>
   
-              {/* Create User Modal */}
-              <CreateUserModal
+              {/* Create Generic Modal */}
+              <CreateGenericModal
+                title="Add New Generic"
+                fields={[
+                  { key: 'name', label: 'Name', type: 'text' },
+                  { key: 'email', label: 'Email', type: 'email' },
+                  { 
+                    key: 'role', 
+                    label: 'Role', 
+                    type: 'select',
+                    options: [
+                      { value: 'Admin', label: 'Admin' },
+                      { value: 'User', label: 'User' }
+                    ]
+                  }
+                ]}
                 isOpen={isModalOpen}
                 onClose={() => {
                   setIsModalOpen(false);
                   setNewUser({ name: '', email: '', role: '' });
                 }}
-                newUser={newUser}
-                onNewUserChange={(field, value) => setNewUser(prev => ({ ...prev, [field]: value }))}
-                onCreateUser={handleCreate}
+                newGeneric={newUser}
+                onNewGenericChange={(field, value) => setNewUser(prev => ({ ...prev, [field]: value }))}
+                onCreateGeneric={handleCreate}
               />
   
-              {/* Users Table */}
-              <UsersTable
-                users={users}
+              {/* Generic Table */}
+              <GenericTable
+                items={users}
+                columns={[
+                  { key: 'id', header: '#', sortable: true },
+                  { 
+                    key: 'avatar', 
+                    header: 'Avatar',
+                    render: (value) => (
+                      <div className="round-img">
+                        <img className="rounded-circle" src={String(value)} alt="" />
+                      </div>
+                    )
+                  },
+                  { key: 'name', header: 'Name', sortable: true, type: 'text' },
+                  { key: 'email', header: 'Email', sortable: true, type: 'email' },
+                  { 
+                    key: 'role', 
+                    header: 'Role', 
+                    sortable: true,
+                    type: 'select',
+                    options: [
+                      { value: 'Admin', label: 'Admin' },
+                      { value: 'User', label: 'User' }
+                    ],
+                    render: (value) => (
+                      <span className={`badge bg-${String(value) === 'Admin' ? 'success' : 'primary'}`}>
+                        {value}
+                      </span>
+                    )
+                  }
+                ]}
                 sortBy={sortBy}
                 sortOrder={sortOrder}
                 onSort={handleSort}
