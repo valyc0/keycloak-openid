@@ -195,3 +195,20 @@ export const getDashboardStats = (): DashboardStats => {
     totalUsers: mockUsers.length
   };
 };
+
+export const alarmOptions = {
+  callTypes: [
+    { value: 'Internazionale', label: 'Internazionale' },
+    { value: 'Nazionale', label: 'Nazionale' },
+    { value: 'Locale', label: 'Locale' }
+  ],
+  carriers: [
+    { value: 'CarrierX', label: 'CarrierX' },
+    { value: 'CarrierY', label: 'CarrierY' },
+    { value: 'CarrierZ', label: 'CarrierZ' }
+  ],
+  statuses: [
+    { value: 'Completata', label: 'Completata' },
+    { value: 'Fallita', label: 'Fallita' }
+  ]
+};

@@ -1,5 +1,5 @@
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { mockUsers, mockTasks, getDashboardStats, mockAlarms } from '../mockData/db';
+import { mockUsers, mockTasks, getDashboardStats, mockAlarms, alarmOptions } from '../mockData/db';
 import { 
   User, 
   Task, 
@@ -54,6 +54,31 @@ const mockApiHandler = async (config: InternalAxiosRequestConfig): Promise<Axios
 
   // Remove baseURL from url for processing
   const path = url?.replace('/api', '') || '';
+  
+  // Log the incoming request
+  console.log(`[Mock API] Processing ${method?.toUpperCase()} ${path}`);
+
+  // Handle alarm options endpoints first (most specific routes)
+  if (method?.toLowerCase() === 'get') {
+    if (path === '/alarms/call-types') {
+      console.log('[Mock API] Handling call-types endpoint');
+      const response = { data: alarmOptions.callTypes };
+      console.log('[Mock API] Returning call types:', response);
+      return delayResponse(response);
+    }
+    if (path === '/alarms/carriers') {
+      console.log('[Mock API] Handling carriers endpoint');
+      const response = { data: alarmOptions.carriers };
+      console.log('[Mock API] Returning carriers:', response);
+      return delayResponse(response);
+    }
+    if (path === '/alarms/statuses') {
+      console.log('[Mock API] Handling statuses endpoint');
+      const response = { data: alarmOptions.statuses };
+      console.log('[Mock API] Returning statuses:', response);
+      return delayResponse(response);
+    }
+  }
 
   // Dashboard endpoints
   if (path === '/dashboard/stats') {
@@ -199,9 +224,11 @@ const mockApiHandler = async (config: InternalAxiosRequestConfig): Promise<Axios
     }
   }
 
-  // Alarms endpoints
+  // Handle all alarms endpoints
   if (path.startsWith('/alarms')) {
     if (method?.toLowerCase() === 'get') {
+
+      // Then handle CRUD endpoints
       if (path === '/alarms') {
         // Handle pagination and filtering
         const params = config.params || {};

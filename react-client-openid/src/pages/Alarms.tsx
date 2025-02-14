@@ -10,17 +10,22 @@ import { alarmService } from '../services/api';
 
 const Alarms = () => {
   const auth = useAuth();
+  const [callTypeOptions, setCallTypeOptions] = useState<{ value: string; label: string }[]>([]);
+  const [carrierOptions, setCarrierOptions] = useState<{ value: string; label: string }[]>([]);
+  const [statusOptions, setStatusOptions] = useState<{ value: string; label: string }[]>([]);
   const [alarms, setAlarms] = useState<Alarm[]>([]);
   const [totalAlarms, setTotalAlarms] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sortBy, setSortBy] = useState<string>('call_id');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [filters, setFilters] = useState<{ [key: string]: string }>({
+  const initialFilters = {
     call_type: '',
     carrier: '',
     call_status: ''
-  });
+  };
+
+  const [filters, setFilters] = useState<{ [key: string]: string }>(initialFilters);
   const [tableLoading, setTableLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +33,7 @@ const Alarms = () => {
   const [showSuggestions] = useState<{ [key: string]: boolean }>({});
   const [suggestions] = useState<{ [key: string]: string[] }>({});
 
-  const [newAlarm, setNewAlarm] = useState<{ [key: string]: string }>({
+  const initialAlarmState = {
     caller_number: '',
     called_number: '',
     start_time: '',
@@ -38,20 +43,12 @@ const Alarms = () => {
     carrier: '',
     charge_amount: '0',
     call_status: ''
-  });
+  };
+
+  const [newAlarm, setNewAlarm] = useState<{ [key: string]: string }>(initialAlarmState);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<{ [key: string]: string }>({
-    caller_number: '',
-    called_number: '',
-    start_time: '',
-    end_time: '',
-    duration_seconds: '0',
-    call_type: '',
-    carrier: '',
-    charge_amount: '0',
-    call_status: ''
-  });
+  const [editForm, setEditForm] = useState<{ [key: string]: string }>(initialAlarmState);
 
   // Fetch alarms data
   const fetchAlarms = async (showLoader = true) => {
@@ -79,6 +76,77 @@ const Alarms = () => {
     }
   };
 
+  // Fetch options data with retry
+  const fetchOptions = async (retryCount = 0) => {
+    const maxRetries = 3;
+    const retryDelay = 1000; // 1 second
+
+    try {
+      const [callTypesRes, carriersRes, statusesRes] = await Promise.all([
+        alarmService.getCallTypes(),
+        alarmService.getCarriers(),
+        alarmService.getStatuses()
+      ]);
+
+      console.log(`[Options Fetch] Attempt ${retryCount + 1}/${maxRetries + 1}`);
+      console.log('Raw API responses:', { callTypesRes, carriersRes, statusesRes });
+
+      // Extract actual data from the nested response structure
+      const callTypes = callTypesRes.data?.data;
+      const carriers = carriersRes.data?.data;
+      const statuses = statusesRes.data?.data;
+
+      console.log('Extracted options data:', { callTypes, carriers, statuses });
+
+      let hasValidData = false;
+
+      if (Array.isArray(callTypes) && callTypes.length > 0) {
+        setCallTypeOptions(callTypes);
+        hasValidData = true;
+      } else {
+        console.error('Invalid call types data:', callTypesRes);
+      }
+
+      if (Array.isArray(carriers) && carriers.length > 0) {
+        setCarrierOptions(carriers);
+        hasValidData = true;
+      } else {
+        console.error('Invalid carriers data:', carriersRes);
+      }
+
+      if (Array.isArray(statuses) && statuses.length > 0) {
+        setStatusOptions(statuses);
+        hasValidData = true;
+      } else {
+        console.error('Invalid statuses data:', statusesRes);
+      }
+
+      // If no valid data and still have retries left, try again
+      if (!hasValidData && retryCount < maxRetries) {
+        console.log(`Retrying options fetch (attempt ${retryCount + 2}/${maxRetries + 1})...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        await fetchOptions(retryCount + 1);
+      }
+
+    } catch (err) {
+      console.error('Failed to fetch options:', err);
+      if (retryCount < maxRetries) {
+        console.log(`Retrying after error (attempt ${retryCount + 2}/${maxRetries + 1})...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        await fetchOptions(retryCount + 1);
+      } else {
+        setError('Failed to fetch options data after multiple attempts. Please check console for details.');
+      }
+    }
+  };
+
+  // Separate effect for options
+  useEffect(() => {
+    if (auth.isAuthenticated) {
+      fetchOptions();
+    }
+  }, [auth.isAuthenticated]);
+
   // Initial data load
   useEffect(() => {
     if (auth.isAuthenticated) {
@@ -87,6 +155,16 @@ const Alarms = () => {
         setInitialLoading(false);
       });
     }
+
+    // Cleanup function to reset state when component unmounts
+    return () => {
+      setCallTypeOptions([]);
+      setCarrierOptions([]);
+      setStatusOptions([]);
+      setAlarms([]);
+      setTotalAlarms(0);
+      setError(null);
+    };
   }, [auth.isAuthenticated]);
 
   // Handle alarms data updates
@@ -101,6 +179,15 @@ const Alarms = () => {
     setCurrentPage(1);
   }, [filters]);
 
+  // Monitor options state changes
+  useEffect(() => {
+    console.log('Options state updated:', {
+      callTypeOptions,
+      carrierOptions,
+      statusOptions
+    });
+  }, [callTypeOptions, carrierOptions, statusOptions]);
+
   const handleCreate = async () => {
     if (!newAlarm.caller_number || !newAlarm.called_number || !newAlarm.call_type) {
       setError('Please fill all required fields');
@@ -114,17 +201,7 @@ const Alarms = () => {
         charge_amount: parseFloat(newAlarm.charge_amount)
       } as Omit<Alarm, 'call_id'>);
       await fetchAlarms();
-      setNewAlarm({
-        caller_number: '',
-        called_number: '',
-        start_time: '',
-        end_time: '',
-        duration_seconds: '0',
-        call_type: '',
-        carrier: '',
-        charge_amount: '0',
-        call_status: ''
-      });
+      setNewAlarm(initialAlarmState);
       setIsModalOpen(false);
     } catch (err) {
       setError('Failed to create alarm');
@@ -132,10 +209,23 @@ const Alarms = () => {
     }
   };
 
-  // Helper function to format date string for datetime-local input
+  // Helper functions for date formatting
+  // Format date for the datetime-local input
   const formatDateForInput = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toISOString().slice(0, 16); // Format: YYYY-MM-DDThh:mm
+  };
+
+  // Format date for display in the table
+  const formatDateForDisplay = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleString('it-IT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const handleEdit = (alarm: Alarm) => {
@@ -222,6 +312,13 @@ const Alarms = () => {
             </div>
             <div className="card-body">
               {/* Filters */}
+              {/* Ensure we have options */}
+              <button 
+                onClick={() => fetchOptions()} 
+                className="btn btn-secondary mb-3"
+              >
+                Refresh Options
+              </button>
               <GenericFilters
                 searchInputs={searchInputs}
                 filters={filters}
@@ -230,30 +327,19 @@ const Alarms = () => {
                     key: 'call_type', 
                     label: 'Call Type', 
                     type: 'select',
-                    options: [
-                      { value: 'Internazionale', label: 'Internazionale' },
-                      { value: 'Nazionale', label: 'Nazionale' },
-                      { value: 'Locale', label: 'Locale' }
-                    ]
+                    options: callTypeOptions
                   },
                   { 
                     key: 'carrier', 
                     label: 'Carrier', 
                     type: 'select',
-                    options: [
-                      { value: 'CarrierX', label: 'CarrierX' },
-                      { value: 'CarrierY', label: 'CarrierY' },
-                      { value: 'CarrierZ', label: 'CarrierZ' }
-                    ]
+                    options: carrierOptions
                   },
                   { 
                     key: 'call_status', 
                     label: 'Status', 
                     type: 'select',
-                    options: [
-                      { value: 'Completata', label: 'Completata' },
-                      { value: 'Fallita', label: 'Fallita' }
-                    ]
+                    options: statusOptions
                   }
                 ]}
                 showSuggestions={showSuggestions}
@@ -263,11 +349,7 @@ const Alarms = () => {
                 onSuggestionClick={() => {}}
                 onShowSuggestionsChange={() => {}}
                 onClearFilters={() => {
-                  setFilters({
-                    call_type: '',
-                    carrier: '',
-                    call_status: ''
-                  });
+                  setFilters(initialFilters);
                   setCurrentPage(1);
                 }}
               />
@@ -295,47 +377,26 @@ const Alarms = () => {
                     key: 'call_type', 
                     label: 'Call Type', 
                     type: 'select',
-                    options: [
-                      { value: 'Internazionale', label: 'Internazionale' },
-                      { value: 'Nazionale', label: 'Nazionale' },
-                      { value: 'Locale', label: 'Locale' }
-                    ]
+                    options: callTypeOptions
                   },
                   { 
                     key: 'carrier', 
                     label: 'Carrier', 
                     type: 'select',
-                    options: [
-                      { value: 'CarrierX', label: 'CarrierX' },
-                      { value: 'CarrierY', label: 'CarrierY' },
-                      { value: 'CarrierZ', label: 'CarrierZ' }
-                    ]
+                    options: carrierOptions
                   },
                   { key: 'charge_amount', label: 'Charge Amount', type: 'text' },
                   { 
                     key: 'call_status', 
                     label: 'Status', 
                     type: 'select',
-                    options: [
-                      { value: 'Completata', label: 'Completata' },
-                      { value: 'Fallita', label: 'Fallita' }
-                    ]
+                    options: statusOptions
                   }
                 ]}
                 isOpen={isModalOpen}
                 onClose={() => {
                   setIsModalOpen(false);
-                  setNewAlarm({
-                    caller_number: '',
-                    called_number: '',
-                    start_time: '',
-                    end_time: '',
-                    duration_seconds: '0',
-                    call_type: '',
-                    carrier: '',
-                    charge_amount: '0',
-                    call_status: ''
-                  });
+                  setNewAlarm(initialAlarmState);
                 }}
                 newGeneric={newAlarm}
                 onNewGenericChange={(field, value) => setNewAlarm(prev => ({ ...prev, [field]: value }))}
@@ -354,32 +415,14 @@ const Alarms = () => {
                     header: 'Start Time', 
                     sortable: true, 
                     type: 'datetime-local',
-                    render: (value) => {
-                      const date = new Date(String(value));
-                      return date.toLocaleString('it-IT', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      });
-                    }
+                    render: (value) => formatDateForDisplay(String(value))
                   },
                   { 
                     key: 'end_time', 
                     header: 'End Time', 
                     sortable: true, 
                     type: 'datetime-local',
-                    render: (value) => {
-                      const date = new Date(String(value));
-                      return date.toLocaleString('it-IT', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      });
-                    }
+                    render: (value) => formatDateForDisplay(String(value))
                   },
                   { key: 'duration_seconds', header: 'Duration (s)', sortable: true },
                   { 
@@ -387,22 +430,14 @@ const Alarms = () => {
                     header: 'Type', 
                     sortable: true,
                     type: 'select',
-                    options: [
-                      { value: 'Internazionale', label: 'Internazionale' },
-                      { value: 'Nazionale', label: 'Nazionale' },
-                      { value: 'Locale', label: 'Locale' }
-                    ]
+                    options: callTypeOptions
                   },
                   { 
                     key: 'carrier', 
                     header: 'Carrier', 
                     sortable: true,
                     type: 'select',
-                    options: [
-                      { value: 'CarrierX', label: 'CarrierX' },
-                      { value: 'CarrierY', label: 'CarrierY' },
-                      { value: 'CarrierZ', label: 'CarrierZ' }
-                    ]
+                    options: carrierOptions
                   },
                   { key: 'charge_amount', header: 'Charge (€)', sortable: true },
                   { 
@@ -410,10 +445,7 @@ const Alarms = () => {
                     header: 'Status', 
                     sortable: true,
                     type: 'select',
-                    options: [
-                      { value: 'Completata', label: 'Completata' },
-                      { value: 'Fallita', label: 'Fallita' }
-                    ],
+                    options: statusOptions,
                     render: (value) => (
                       <span className={`badge bg-${String(value) === 'Completata' ? 'success' : 'danger'}`}>
                         {value}

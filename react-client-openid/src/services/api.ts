@@ -49,5 +49,11 @@ export const alarmService = {
   update: (id: string, alarm: Omit<Alarm, 'call_id'>) => 
     api.put<Alarm>(`/alarms/${id}`, alarm),
   delete: (id: string) => 
-    api.delete(`/alarms/${id}`)
+    api.delete(`/alarms/${id}`),
+  getCallTypes: () =>
+    api.get<{ data: { value: string; label: string }[] }>('/alarms/call-types'),
+  getCarriers: () =>
+    api.get<{ data: { value: string; label: string }[] }>('/alarms/carriers'),
+  getStatuses: () =>
+    api.get<{ data: { value: string; label: string }[] }>('/alarms/statuses')
 };

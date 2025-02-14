@@ -64,18 +64,24 @@ const GenericFilters: FC<GenericFiltersProps<any>> = ({
                 )}
               </>
             ) : field.type === 'select' && field.options ? (
-              <select
-                className="form-control"
-                value={filters[field.key] || ''}
-                onChange={(e) => onFilterChange(field.key, e.target.value)}
-              >
-                <option value="">{`All ${field.label}s`}</option>
-                {field.options.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <>
+                {console.log(`Rendering select for ${field.key}:`, field.options)}
+                <select
+                  className="form-control"
+                  value={filters[field.key] || ''}
+                  onChange={(e) => onFilterChange(field.key, e.target.value)}
+                >
+                  <option value="">{`All ${field.label}s`}</option>
+                  {field.options.map(option => {
+                    console.log(`Option for ${field.key}:`, option);
+                    return (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    );
+                  })}
+                </select>
+              </>
             ) : null}
           </div>
         </div>
