@@ -1,0 +1,14 @@
+// Import base styles and utilities
+@import './spec/settings/index';
+@import './spec/tools/index';
+@import './spec/generic/index';
+@import './spec/utils/index';
+
+// Import components
+@import './spec/components/index';
+
+// Import screen-specific styles
+@import './spec/screens/index';
+
+// Import vendor styles
+@import './vendor/themify-icons.css';
