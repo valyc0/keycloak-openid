@@ -1,0 +1,230 @@
+.widget-card {
+  transition: all 0.2s ease;
+  overflow: hidden;
+  border-radius: 1rem;
+  height: 135px;
+  background-image: linear-gradient(to right bottom, var(--gradient-start), var(--gradient-end)) !important;
+}
+
+.widget-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--hover-shadow);
+}
+
+.widget-card .card-body {
+  padding: 1.25rem;
+  height: 100%;
+}
+
+.widget-card.primary {
+  --gradient-start: #e14eca;
+  --gradient-end: #ba54f5;
+}
+
+.widget-card.info {
+  --gradient-start: #1d8cf8;
+  --gradient-end: #3358f4;
+}
+
+.widget-card.success {
+  --gradient-start: #00f2c3;
+  --gradient-end: #0098f0;
+}
+
+.widget-card.warning {
+  --gradient-start: #ff8d72;
+  --gradient-end: #ff6491;
+}
+
+.widget-card p {
+  font-size: 0.875rem !important;
+  margin-bottom: 0.5rem;
+  opacity: 0.8;
+  line-height: 1.4;
+}
+
+.widget-card h3 {
+  font-size: 1.75rem !important;
+  font-weight: 400;
+  margin-bottom: 0;
+  letter-spacing: -0.02em;
+  color: rgba(0, 0, 0, 0.8) !important;
+  line-height: 1.2;
+}
+
+.widget-card .mt-3 {
+  margin-top: 0.75rem !important;
+}
+
+.stats-icon {
+  opacity: 0.4;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+/* Table Card */
+.card {
+  margin-bottom: 1.5rem;
+  background-color: var(--card-background) !important;
+}
+
+.card-header {
+  background-color: var(--card-background) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.25rem 1.5rem;
+}
+
+.card-header h5.card-title {
+  color: white !important;
+  font-size: 1.1rem !important;
+  font-weight: 400 !important;
+  margin: 0 !important;
+  letter-spacing: 0.03em !important;
+}
+
+/* Table styles */
+.table-responsive {
+  border-radius: 6px;
+  height: 400px;
+  position: relative;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.table {
+  --bs-table-bg: var(--panel-background);
+  --bs-table-color: white;
+  --bs-table-border-color: rgba(255, 255, 255, 0.1);
+  --bs-table-striped-bg: rgba(0, 0, 0, 0.1);
+  --bs-table-striped-color: white;
+  --bs-table-active-color: white;
+  --bs-table-active-bg: rgba(0, 0, 0, 0.2);
+  --bs-table-hover-color: white;
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+  background-color: var(--panel-background);
+  margin-bottom: 0;
+  color: white !important;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: var(--dark-background);
+}
+
+.table thead th {
+  position: sticky;
+  top: 0;
+  background-color: var(--dark-background) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: none;
+  font-size: 0.75rem !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 7px;
+  color: var(--purple);
+  white-space: nowrap;
+  text-align: left;
+}
+
+.table thead::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 1;
+}
+
+.table td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 7px;
+  font-size: 1rem !important;
+  font-weight: 300;
+  vertical-align: middle;
+  color: white !important;
+  background-color: transparent !important;
+}
+
+.table > :not(caption) > * > * {
+  background-color: transparent;
+  box-shadow: none !important;
+  color: white !important;
+}
+
+.table tbody tr {
+  transition: all 0.15s ease;
+  background-clip: padding-box;
+  color: white !important;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  color: white !important;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: transparent !important;
+  color: white !important;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: white !important;
+  position: relative;
+  z-index: 1;
+}
+
+.table-hover tbody tr:hover td {
+  color: white !important;
+}
+
+.text-white-50 {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.badge {
+  padding: 0.45em 0.8em;
+  font-size: 0.875rem !important;
+  border-radius: 0.5rem;
+}
+
+.badge.bg-success {
+  background: var(--success-gradient) !important;
+}
+
+.badge.bg-warning {
+  background: var(--warning-gradient) !important;
+}
+
+.badge.bg-danger {
+  background: linear-gradient(to right bottom, #fd5d93, #ec250d) !important;
+}
+
+.btn-link {
+  text-decoration: none;
+  padding: 0;
+  color: inherit !important;
+}
+
+.btn-link:hover {
+  opacity: 0.8;
+}
+
+.text-info {
+  color: var(--blue) !important;
+}
+
+.text-warning {
+  color: #ff8d72 !important;
+}
+
+@media (max-width: 768px) {
+  .table {
+    min-width: 800px;
+  }
+}

@@ -1,0 +1,60 @@
+.modalContent {
+  background-color: #1e1e2d !important;
+  color: #ffffff !important;
+}
+
+.modalContent .modal-header {
+  border-bottom-color: #2d2d3f !important;
+}
+
+.modalContent .modal-footer {
+  border-top-color: #2d2d3f !important;
+}
+
+.modalContent label {
+  color: #ffffff !important;
+}
+
+.modalContent input {
+  background-color: #2d2d3f !important;
+  border-color: #2d2d3f !important;
+  color: #ffffff !important;
+}
+
+.customSelect {
+  background-color: #2d2d3f !important;
+  border-color: #2d2d3f !important;
+  color: #ffffff !important;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1em;
+  padding-right: 2.5rem;
+}
+
+.modalContent input:focus {
+  background-color: #2d2d3f !important;
+  border-color: #375a7f !important;
+  box-shadow: 0 0 0 0.25rem rgba(55, 90, 127, 0.25) !important;
+  color: #ffffff !important;
+}
+
+.customSelect:focus {
+  background-color: #2d2d3f !important;
+  border-color: #375a7f !important;
+  box-shadow: 0 0 0 0.25rem rgba(55, 90, 127, 0.25) !important;
+  color: #ffffff !important;
+}
+
+.customSelect option {
+  background-color: #2d2d3f !important;
+  color: #ffffff !important;
+  padding: 8px;
+}
+
+.customSelect option:hover,
+.customSelect option:focus,
+.customSelect option:checked {
+  background-color: #375a7f !important;
+}

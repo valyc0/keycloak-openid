@@ -1,0 +1,31 @@
+.filterInput {
+  background-color: #2d2d3f !important;
+  border-color: #375a7f !important;
+  color: #ffffff !important;
+}
+
+.filterInput::placeholder {
+  color: #6c757d !important;
+}
+
+.filterInput:focus {
+  background-color: #2d2d3f !important;
+  border-color: #375a7f !important;
+  box-shadow: 0 0 0 0.2rem rgba(55, 90, 127, 0.25) !important;
+  color: #ffffff !important;
+}
+
+.suggestionList {
+  background-color: #2d2d3f !important;
+  border-color: #375a7f !important;
+}
+
+.suggestionItem {
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+}
+
+.suggestionItem:hover {
+  background-color: #375a7f !important;
+  cursor: pointer;
+}

@@ -1,0 +1,38 @@
+/* Elastic skin CSS for login form */
+.cs-skin-elastic {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #5b8583;
+}
+
+.cs-skin-elastic > span {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.cs-skin-elastic .cs-options {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cs-skin-elastic .cs-options ul li {
+  padding: 8px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.cs-skin-elastic .cs-options ul li:hover {
+  background-color: #f5f5f5;
+}
+
+.cs-skin-elastic .cs-options span {
+  padding: 8px;
+}
+
+.cs-skin-elastic.cs-active .cs-options {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}

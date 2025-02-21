@@ -1,0 +1,79 @@
+/* Login page styles */
+.sufee-login {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  background: #1e1e2d;
+}
+
+.login-content {
+  max-width: 540px;
+  margin: 8vh auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-logo img {
+  max-width: 150px;
+}
+
+.login-form {
+  background: #fff;
+  padding: 30px;
+  border-radius: 8px;
+}
+
+.login-form h4 {
+  color: #1e1e2d;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.btn-flat {
+  border-radius: 0;
+}
+
+.btn-addon {
+  position: relative;
+  padding-left: 40px;
+  width: 100%;
+}
+
+.btn-addon i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  background: rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-login-content {
+  margin: 20px 0;
+}
+
+.register-link {
+  margin-top: 15px;
+  text-align: center;
+  color: #666;
+}
+
+.btn-primary {
+  background-color: #2196F3;
+  border-color: #2196F3;
+}
+
+.btn-primary:hover {
+  background-color: #1976D2;
+  border-color: #1976D2;
+}

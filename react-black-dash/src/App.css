@@ -1,0 +1,84 @@
+:root {
+  --sidebar-width: 250px;
+  --header-height: 62px;  /* Aumentato per corrispondere al nuovo padding dell'header */
+  --dark-background: #1e1e2f;
+  --panel-background: #2b3553;
+  --card-background: #27293d;
+  --purple: #e14eca;
+  --blue: #1d8cf8;
+  --purple-gradient: linear-gradient(to right bottom, #4a7ab2, #375a7f);
+  --blue-gradient: linear-gradient(to right bottom, #1d8cf8, #3358f4);
+  --success-gradient: linear-gradient(to right bottom, #00f2c3, #0098f0);
+  --warning-gradient: linear-gradient(to right bottom, #ff8d72, #ff6491);
+  --card-shadow: 0 0 2rem 0 rgba(0,0,0,.15);
+  --hover-shadow: 0 0 2.5rem 0 rgba(0,0,0,.25);
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--dark-background);
+  color: #ffffff;
+  font-family: var(--bs-font-sans-serif);
+  font-weight: 300;
+  min-height: 100vh;
+  letter-spacing: 0.1px;
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+  font-size: 1rem;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  width: 100%;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.wrapper {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+}
+
+.wrapper.sidebar-collapsed {
+  margin-left: 70px;
+  width: calc(100% - 70px);
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  padding: calc(var(--header-height) + 1.5rem) 1rem 1rem 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Aggiustamenti per il contenuto delle pagine */
+.main-content .row {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.main-content .card {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+/* Il resto del CSS rimane invariato */

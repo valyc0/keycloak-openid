@@ -1,0 +1,46 @@
+.paginationContainer {
+  margin-top: 2rem;
+}
+
+.pagination li a,
+.pagination li button {
+  background-color: #2d2d3f !important;
+  border-color: #375a7f !important;
+  color: #ffffff !important;
+}
+
+.pagination li.active button,
+.activeButton {
+  background-color: #ffc107 !important;
+  border-color: #ffc107 !important;
+  color: #000000 !important;
+  font-weight: bold !important;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(255, 193, 7, 0.5) !important;
+}
+
+.pagination li button:hover:not(:disabled):not(.activeButton) {
+  background-color: #375a7f !important;
+  border-color: #375a7f !important;
+  color: #ffffff !important;
+  transform: scale(1.02);
+}
+
+.pagination li button:disabled {
+  background-color: #1e1e2d !important;
+  border-color: #2d2d3f !important;
+  color: #6c757d !important;
+}
+.sortable-header {
+  cursor: pointer;
+  position: relative;
+  padding-right: 20px !important;
+}
+
+.sortIcon {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #007bff;
+}
