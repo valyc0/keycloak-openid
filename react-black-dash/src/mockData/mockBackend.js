@@ -36,6 +36,15 @@ const alarms = Array.from({ length: 100 }, (_, i) => {
 // Helper function to generate ID
 const generateId = () => Math.max(...alarms.map(alarm => alarm.id)) + 1;
 
+// Helper function to simulate network delay
+const delay = (data) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(data);
+    }, 300);
+  });
+};
+
 // Mock backend functions
 export const mockBackend = {
   // Get paginated alarms with sorting and filtering
@@ -51,15 +60,10 @@ export const mockBackend = {
       }
     });
 
-    console.log('Before sorting:', { sortBy, sortOrder });
-    console.log('Initial data:', filteredAlarms);
-
     // Apply sorting
     filteredAlarms.sort((a, b) => {
       const aValue = a[sortBy];
       const bValue = b[sortBy];
-      
-      console.log('Comparing:', { aValue, bValue, sortBy, sortOrder });
 
       // Handle null/undefined values
       if (aValue === null || aValue === undefined) return sortOrder === 'asc' ? 1 : -1;
@@ -68,17 +72,13 @@ export const mockBackend = {
       try {
         // Handle different data types
         if (typeof aValue === 'number' && typeof bValue === 'number') {
-          const result = sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
-          console.log('Number comparison result:', result);
-          return result;
+          return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
         }
         
         if (sortBy === 'timestamp') {
           const aDate = new Date(aValue);
           const bDate = new Date(bValue);
-          const result = sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
-          console.log('Date comparison result:', result);
-          return result;
+          return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
         }
         
         // Default string comparison
@@ -86,42 +86,38 @@ export const mockBackend = {
         const bString = String(bValue).toLowerCase();
         if (aString === bString) return 0;
         const comparison = aString.localeCompare(bString);
-        const result = sortOrder === 'asc' ? comparison : -comparison;
-        console.log('String comparison result:', result);
-        return result;
+        return sortOrder === 'asc' ? comparison : -comparison;
       } catch (error) {
         console.error('Error during sort comparison:', error);
         return 0;
       }
     });
 
-    console.log('After sorting:', filteredAlarms);
-
     // Apply pagination
     const start = (page - 1) * pageSize;
     const paginatedAlarms = filteredAlarms.slice(start, start + pageSize);
 
-    return {
+    return delay({
       data: paginatedAlarms,
       total: filteredAlarms.length,
       page,
       pageSize
-    };
+    });
   },
 
   // Create new alarm
-  createAlarm: (alarmData) => {
+  createAlarm: async (alarmData) => {
     const newAlarm = {
       id: generateId(),
       ...alarmData,
       timestamp: new Date().toISOString()
     };
     alarms.push(newAlarm);
-    return newAlarm;
+    return delay({ data: newAlarm });
   },
 
   // Update existing alarm
-  updateAlarm: (id, alarmData) => {
+  updateAlarm: async (id, alarmData) => {
     const index = alarms.findIndex(alarm => alarm.id === parseInt(id));
     if (index === -1) throw new Error('Alarm not found');
     
@@ -130,22 +126,23 @@ export const mockBackend = {
       ...alarmData,
       id: parseInt(id)
     };
-    return alarms[index];
+    return delay({ data: alarms[index] });
   },
 
   // Delete alarm
-  deleteAlarm: (id) => {
+  deleteAlarm: async (id) => {
     const index = alarms.findIndex(alarm => alarm.id === parseInt(id));
     if (index === -1) throw new Error('Alarm not found');
     alarms.splice(index, 1);
+    return delay({ data: null });
   },
 
   // Get call types
-  getCallTypes: () => callTypes,
+  getCallTypes: () => delay({ data: callTypes }),
 
   // Get carriers
-  getCarriers: () => carriers,
+  getCarriers: () => delay({ data: carriers }),
 
   // Get statuses
-  getStatuses: () => statuses
+  getStatuses: () => delay({ data: statuses })
 };

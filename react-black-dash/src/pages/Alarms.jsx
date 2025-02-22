@@ -24,27 +24,31 @@ const Alarms = () => {
   const [searchInputs, setSearchInputs] = useState({});
   const [showSuggestions, setShowSuggestions] = useState({});
   const [suggestions, setSuggestions] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  const filterFields = [
+  const createOptions = options =>
+    Array.isArray(options) ? options.map(opt => ({ value: opt, label: opt })) : [];
+
+  const getFilterFields = () => [
     { key: 'caller_number', label: 'Caller Number', type: 'text' },
     { key: 'callee_number', label: 'Callee Number', type: 'text' },
     {
       key: 'call_type',
       label: 'Call Type',
       type: 'select',
-      options: callTypeOptions.map(type => ({ value: type, label: type }))
+      options: createOptions(callTypeOptions)
     },
     {
       key: 'carrier',
       label: 'Carrier',
       type: 'select',
-      options: carrierOptions.map(carrier => ({ value: carrier, label: carrier }))
+      options: createOptions(carrierOptions)
     },
     {
       key: 'status',
       label: 'Status',
       type: 'select',
-      options: statusOptions.map(status => ({ value: status, label: status }))
+      options: createOptions(statusOptions)
     }
   ];
 
@@ -109,6 +113,7 @@ const Alarms = () => {
   // Fetch alarms data
   const fetchAlarms = async (newFilters = {}) => {
     setError(null);
+    setIsLoading(true);
     const currentFilters = { ...filters, ...newFilters };
     console.log('Fetching with params:', { currentPage, pageSize, sortBy, sortOrder, filters: currentFilters });
     try {
@@ -126,6 +131,8 @@ const Alarms = () => {
     } catch (err) {
       setError('Error fetching alarms');
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -137,9 +144,16 @@ const Alarms = () => {
         alarmService.getCallTypes(),
         alarmService.getCarriers()
       ]);
-      setStatusOptions(statusRes.data);
-      setCallTypeOptions(callTypeRes.data);
-      setCarrierOptions(carrierRes.data);
+      console.log('Raw responses:', { statusRes, callTypeRes, carrierRes });
+      const statuses = statusRes?.data || [];
+      const callTypes = callTypeRes?.data || [];
+      const carriers = carrierRes?.data || [];
+      
+      console.log('Setting options:', { statuses, callTypes, carriers });
+      
+      setStatusOptions(statuses);
+      setCallTypeOptions(callTypes);
+      setCarrierOptions(carriers);
     } catch (err) {
       console.error('Error fetching options:', err);
       setError('Failed to fetch options data');
@@ -212,21 +226,21 @@ const Alarms = () => {
     { key: 'timestamp', label: 'Timestamp' }
   ];
 
-  const fields = [
+  const getFields = () => [
     { name: 'caller_number', label: 'Caller Number', type: 'text', required: true },
     { name: 'callee_number', label: 'Callee Number', type: 'text', required: true },
     {
       name: 'call_type',
       label: 'Call Type',
       type: 'select',
-      options: callTypeOptions,
+      options: createOptions(callTypeOptions),
       required: true
     },
     {
       name: 'carrier',
       label: 'Carrier',
       type: 'select',
-      options: carrierOptions,
+      options: createOptions(carrierOptions),
       required: true
     },
     {
@@ -246,7 +260,7 @@ const Alarms = () => {
       name: 'status',
       label: 'Status',
       type: 'select',
-      options: statusOptions,
+      options: createOptions(statusOptions),
       required: true
     }
   ];
@@ -276,7 +290,7 @@ const Alarms = () => {
             <GenericFilters
               searchInputs={searchInputs}
               filters={filters}
-              filterFields={filterFields}
+              filterFields={getFilterFields()}
               showSuggestions={showSuggestions}
               suggestions={suggestions}
               onSearchInputChange={handleSearchInputChange}
@@ -288,7 +302,7 @@ const Alarms = () => {
             <CreateGenericModal
               isOpen={isModalOpen}
               title={editingId ? "Edit Alarm" : "Add New Alarm"}
-              fields={fields}
+              fields={getFields()}
               onSubmit={editingId ? handleEdit : handleCreate}
               onClose={() => {
                 setIsModalOpen(false);
@@ -298,9 +312,15 @@ const Alarms = () => {
               newGeneric={editingId ? editForm : newAlarm}
               onNewGenericChange={(field, value) => {
                 if (editingId) {
-                  setEditForm(prev => ({ ...prev, [field]: value }));
+                  setEditForm(prev => ({
+                    ...prev,
+                    [field]: value
+                  }));
                 } else {
-                  setNewAlarm(prev => ({ ...prev, [field]: value }));
+                  setNewAlarm(prev => ({
+                    ...prev,
+                    [field]: value
+                  }));
                 }
               }}
             />
@@ -324,6 +344,7 @@ const Alarms = () => {
                 setSortBy(key);
                 setSortOrder(newOrder);
               }}
+              isLoading={isLoading}
             />
           </div>
         </div>

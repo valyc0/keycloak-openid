@@ -8,9 +8,9 @@ timestamp=$(date +%Y%m%d%H%M%S)
 
 # Create tar.gz archive excluding node_modules
 cd ..
-tar --exclude='myprj/node_modules' \
-    --exclude='myprj/.git' \
-    -czf "backup/myprj-${timestamp}.tar.gz" \
-    myprj/
+tar --exclude='react-black-dash/node_modules' \
+    --exclude='react-black-dash/.git' \
+    -czf "backup/react-black-dash-${timestamp}.tar.gz" \
+    react-black-dash/
 
-echo "Backup created: backup/myprj-${timestamp}.tar.gz"
+echo "Backup created: backup/react-black-dash-${timestamp}.tar.gz"

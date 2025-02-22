@@ -12,7 +12,8 @@ const GenericTable = ({
   onPageChange,
   sortBy,
   sortOrder,
-  onSort
+  onSort,
+  isLoading
 }) => {
   const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -134,7 +135,14 @@ const GenericTable = ({
 
   return (
     <div>
-      <div className="table-responsive">
+      {isLoading && (
+        <div className="text-center my-3">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      )}
+      <div className={`table-responsive ${isLoading ? 'opacity-50' : ''}`}>
         <table className="table table-striped w-100">
           <thead>
             <tr>

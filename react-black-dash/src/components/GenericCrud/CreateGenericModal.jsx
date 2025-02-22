@@ -49,7 +49,8 @@ const CreateGenericModal = ({
       onChange: (e) => onNewGenericChange(field.name, e.target.value),
       className: 'form-control',
       required: field.required,
-      ref: isFirstField ? firstInputRef : null
+      // Remove auto-focus behavior
+      ref: null
     };
 
     switch (field.type) {
@@ -57,9 +58,9 @@ const CreateGenericModal = ({
         return (
           <select {...commonProps} className={`form-control ${styles.customSelect}`}>
             <option value="">Select {field.label}</option>
-            {field.options.map((option) => (
-              <option key={option} value={option}>
-                {option}
+            {(field.options || []).map((option) => (
+              <option key={typeof option === 'object' ? option.value : option} value={typeof option === 'object' ? option.value : option}>
+                {typeof option === 'object' ? option.label : option}
               </option>
             ))}
           </select>

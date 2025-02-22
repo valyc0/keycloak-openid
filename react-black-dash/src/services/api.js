@@ -12,7 +12,7 @@ export const alarmService = {
 
   async create(alarm) {
     try {
-      return mockBackend.createAlarm(alarm);
+      return await mockBackend.createAlarm(alarm);
     } catch (error) {
       console.error('Error creating alarm:', error);
       throw error;
@@ -21,7 +21,7 @@ export const alarmService = {
 
   async update(id, alarm) {
     try {
-      return mockBackend.updateAlarm(id, alarm);
+      return await mockBackend.updateAlarm(id, alarm);
     } catch (error) {
       console.error('Error updating alarm:', error);
       throw error;
@@ -30,7 +30,7 @@ export const alarmService = {
 
   async delete(id) {
     try {
-      return mockBackend.deleteAlarm(id);
+      return await mockBackend.deleteAlarm(id);
     } catch (error) {
       console.error('Error deleting alarm:', error);
       throw error;
@@ -39,8 +39,7 @@ export const alarmService = {
 
   async getCallTypes() {
     try {
-      const types = mockBackend.getCallTypes();
-      return { data: types };
+      return await mockBackend.getCallTypes();
     } catch (error) {
       console.error('Error fetching call types:', error);
       throw error;
@@ -49,8 +48,7 @@ export const alarmService = {
 
   async getCarriers() {
     try {
-      const carriers = mockBackend.getCarriers();
-      return { data: carriers };
+      return await mockBackend.getCarriers();
     } catch (error) {
       console.error('Error fetching carriers:', error);
       throw error;
@@ -59,8 +57,7 @@ export const alarmService = {
 
   async getStatuses() {
     try {
-      const statuses = mockBackend.getStatuses();
-      return { data: statuses };
+      return await mockBackend.getStatuses();
     } catch (error) {
       console.error('Error fetching statuses:', error);
       throw error;
