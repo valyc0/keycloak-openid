@@ -8,8 +8,7 @@ const Sidebar = ({ isCollapsed, isMobile, isSidebarOpen, onToggleSidebar }) => {
   useEffect(() => {
     const handleNavLinkClick = (e) => {
       if (isMobile) {
-        // La chiusura della sidebar è gestita nel componente App
-        return;
+        onToggleSidebar(); // Close the sidebar in mobile view
       }
 
       // Rimuovi la classe active da tutti i link
@@ -21,17 +20,16 @@ const Sidebar = ({ isCollapsed, isMobile, isSidebarOpen, onToggleSidebar }) => {
       e.currentTarget.classList.add('active');
     };
 
-    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
-    navLinks.forEach(link => {
+    document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
       link.addEventListener('click', handleNavLinkClick);
     });
 
     return () => {
-      navLinks.forEach(link => {
+      document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
         link.removeEventListener('click', handleNavLinkClick);
       });
     };
-  }, [isMobile]);
+  }, [isMobile, onToggleSidebar]);
 
   return (
     <div 
