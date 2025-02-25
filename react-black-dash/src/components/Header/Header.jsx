@@ -47,20 +47,49 @@ const Header = ({ onToggleSidebar, sidebarCollapsed }) => {
 
   return (
     <div className={`header d-flex justify-content-between align-items-center ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-      <div className="d-flex align-items-center">
-        <button
-          className="btn btn-link text-white d-md-none me-2"
-          onClick={onToggleSidebar}
-          data-sidebar-toggle
-        >
-          <i className="fas fa-bars"></i>
-        </button>
-        <input
-          type="text"
-          className="form-control search-input"
-          placeholder="Search..."
-          style={{ width: '200px' }}
-        />
+      <div className="d-flex align-items-center flex-grow-1">
+        <div className="d-flex align-items-center me-3">
+          <button
+            className="btn btn-link text-white d-md-none me-2"
+            onClick={onToggleSidebar}
+            data-sidebar-toggle
+          >
+            <i className="fas fa-bars"></i>
+          </button>
+          <svg
+            className="header-logo d-md-none"
+            width="30"
+            height="30"
+            viewBox="0 0 35 35"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M17.5 3L32 12.25V22.75L17.5 32L3 22.75V12.25L17.5 3Z"
+              stroke="white"
+              strokeWidth="2"
+            />
+            <path
+              d="M17.5 8L26 13.5V20.5L17.5 26L9 20.5V13.5L17.5 8Z"
+              fill="white"
+            />
+            <circle
+              cx="17.5"
+              cy="17.5"
+              r="3.5"
+              fill="var(--purple)"
+            />
+          </svg>
+          <span className="header-brand d-md-none text-white ms-2">My dash</span>
+        </div>
+        <div className="flex-grow-1">
+          <input
+            type="text"
+            className="form-control search-input"
+            placeholder="Search..."
+            style={{ width: '200px' }}
+          />
+        </div>
       </div>
       <div className="d-flex align-items-center">
         <div className="dropdown">
