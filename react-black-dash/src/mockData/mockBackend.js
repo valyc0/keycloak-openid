@@ -84,14 +84,15 @@ const delay = (data) => {
 export const mockBackend = {
   // Gateway related functions
   getGateways: ({ query = '', page = 1, pageSize = 10, sortBy = 'name', sortOrder = 'asc' }) => {
-    if (!query || query.length < 3) {
-      return delay({ data: [], total: 0, page, pageSize });
-    }
+    let filteredGateways = [...mockGateways];
     
-    let filteredGateways = mockGateways.filter(gateway =>
-      gateway.name.toLowerCase().includes(query.toLowerCase()) ||
-      gateway.serial.toLowerCase().includes(query.toLowerCase())
-    );
+    // Apply search filter if query is provided and has 3 or more characters
+    if (query && query.length >= 3) {
+      filteredGateways = filteredGateways.filter(gateway =>
+        gateway.name.toLowerCase().includes(query.toLowerCase()) ||
+        gateway.serial.toLowerCase().includes(query.toLowerCase())
+      );
+    }
 
     // Apply sorting
     filteredGateways.sort((a, b) => {

@@ -20,10 +20,6 @@ const SelectGateway = ({
   const [suggestions, setSuggestions] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const getFilterFields = () => [
-    { key: 'search', label: 'Search Gateway', type: 'text' }
-  ];
-
   // Fetch gateways data
   const fetchGateways = async (newFilters = {}) => {
     setError(null);
@@ -50,24 +46,14 @@ const SelectGateway = ({
   };
 
   useEffect(() => {
-    if (filters.search && filters.search.length >= 3) {
-      fetchGateways();
-    } else {
-      setGateways([]);
-      setTotalGateways(0);
-    }
+    fetchGateways();
   }, [currentPage, sortBy, sortOrder, filters.search]);
 
   // Filter handling functions
   const handleSearchInputChange = (field, value) => {
     setSearchInputs(prev => ({ ...prev, [field]: value }));
-    if (value.length >= 3) {
-      setFilters(prev => ({ ...prev, [field]: value }));
-      setCurrentPage(1);
-    } else {
-      setGateways([]);
-      setTotalGateways(0);
-    }
+    setFilters(prev => ({ ...prev, [field]: value }));
+    setCurrentPage(1);
   };
 
   const handleClearFilters = () => {
@@ -80,12 +66,25 @@ const SelectGateway = ({
   };
 
   const columns = [
-    { key: 'name', label: 'Gateway Name' },
-    { key: 'serial', label: 'Serial Number' },
-    { key: 'type', label: 'Type' },
+    {
+      key: 'name',
+      label: 'Gateway Name',
+      style: { width: '30%' }
+    },
+    {
+      key: 'serial',
+      label: 'Serial Number',
+      style: { width: '30%' }
+    },
+    {
+      key: 'type',
+      label: 'Type',
+      style: { width: '20%' }
+    },
     {
       key: 'status',
       label: 'Status',
+      style: { width: '20%' },
       render: (gateway) => (
         <span className={`badge badge-${gateway.status === 'Online' ? 'success' : 'danger'}`}>
           {gateway.status}
@@ -93,6 +92,19 @@ const SelectGateway = ({
       )
     }
   ];
+
+  const getFilterFields = () => [
+    {
+      key: 'search',
+      label: 'Search by Name or Serial',
+      type: 'text',
+      placeholder: 'Type to search gateways...'
+    }
+  ];
+
+  const getRowClassName = (item) => {
+    return selectedGateway?.id === item.id ? 'table-primary' : '';
+  };
 
   return (
     <div className="card">
@@ -119,40 +131,32 @@ const SelectGateway = ({
           onClearFilters={handleClearFilters}
         />
 
-        {!filters.search && (
-          <div className="alert alert-info mt-3">
-            <i className="fa fa-info-circle mr-2"></i>
-            Type at least 3 characters to search for gateways
-          </div>
-        )}
-
-        {filters.search && filters.search.length >= 3 && (
-          <GenericTable
-            columns={columns}
-            data={gateways}
-            onRowClick={(gateway) => onSelect(gateway)}
-            selectedId={selectedGateway?.id}
-            currentPage={currentPage}
-            pageSize={pageSize}
-            totalItems={totalGateways}
-            onPageChange={setCurrentPage}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            onSort={(key) => {
-              const newOrder = sortBy === key && sortOrder === 'asc' ? 'desc' : 'asc';
-              setSortBy(key);
-              setSortOrder(newOrder);
-            }}
-            isLoading={isLoading}
-            hoverable={true}
-            showActions={false}
-            displayOptions={{
-              showEdit: false,
-              showDelete: false,
-              showActions: false
-            }}
-          />
-        )}
+        <GenericTable
+          columns={columns}
+          data={gateways}
+          onRowClick={(gateway) => onSelect(gateway)}
+          selectedId={selectedGateway?.id}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          totalItems={totalGateways}
+          onPageChange={setCurrentPage}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSort={(key) => {
+            const newOrder = sortBy === key && sortOrder === 'asc' ? 'desc' : 'asc';
+            setSortBy(key);
+            setSortOrder(newOrder);
+          }}
+          isLoading={isLoading}
+          hoverable={true}
+          showActions={false}
+          displayOptions={{
+            showEdit: false,
+            showDelete: false,
+            showActions: false
+          }}
+          getRowClassName={getRowClassName}
+        />
       </div>
     </div>
   );

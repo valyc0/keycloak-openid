@@ -15,7 +15,8 @@ const GenericTable = ({
   onSort,
   isLoading,
   showActions = true,
-  onRowClick = null
+  onRowClick = null,
+  getRowClassName = null
 }) => {
   const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -188,10 +189,11 @@ const GenericTable = ({
           </thead>
           <tbody>
             {data.map((item) => (
-              <tr 
+              <tr
                 key={item.id}
                 onClick={() => onRowClick && onRowClick(item)}
                 style={{ cursor: onRowClick ? 'pointer' : 'default' }}
+                className={getRowClassName ? getRowClassName(item) : ''}
               >
                 {columns.map((column) => (
                   <td key={`${item.id}-${column.key}`}>
