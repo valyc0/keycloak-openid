@@ -105,8 +105,15 @@ const Sidebar = ({ isCollapsed, isMobile, isSidebarOpen, onToggleSidebar }) => {
           <i className="fas fa-chart-bar" aria-hidden="true"></i>
           <span>Analytics</span>
         </Link>
-        <Link 
-          to="/settings" 
+        <Link
+          to="/gateway-wizard"
+          className={`nav-link ${location.pathname === '/gateway-wizard' ? 'active' : ''}`}
+        >
+          <i className="fas fa-server" aria-hidden="true"></i>
+          <span>Gateway Wizard</span>
+        </Link>
+        <Link
+          to="/settings"
           className={`nav-link ${location.pathname === '/settings' ? 'active' : ''}`}
         >
           <i className="fas fa-cog" aria-hidden="true"></i>

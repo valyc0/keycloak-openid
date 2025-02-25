@@ -1,5 +1,61 @@
 import { mockBackend } from '../mockData/mockBackend';
 
+export const gatewayService = {
+  async getGateways() {
+    try {
+      return await mockBackend.getGateways();
+    } catch (error) {
+      console.error('Error fetching gateways:', error);
+      throw error;
+    }
+  },
+
+  async getSites() {
+    try {
+      return await mockBackend.getSites();
+    } catch (error) {
+      console.error('Error fetching sites:', error);
+      throw error;
+    }
+  },
+
+  async getMeters() {
+    try {
+      return await mockBackend.getMeters();
+    } catch (error) {
+      console.error('Error fetching meters:', error);
+      throw error;
+    }
+  },
+
+  async getMeterParameters() {
+    try {
+      return await mockBackend.getMeterParameters();
+    } catch (error) {
+      console.error('Error fetching meter parameters:', error);
+      throw error;
+    }
+  },
+
+  async validateGatewayParameters(params) {
+    try {
+      return await mockBackend.validateGatewayParameters(params);
+    } catch (error) {
+      console.error('Error validating parameters:', error);
+      throw error;
+    }
+  },
+
+  async saveGatewayConfiguration(config) {
+    try {
+      return await mockBackend.saveGatewayConfiguration(config);
+    } catch (error) {
+      console.error('Error saving gateway configuration:', error);
+      throw error;
+    }
+  }
+};
+
 export const alarmService = {
   async getAll({ page = 1, pageSize = 10, sortBy = 'id', sortOrder = 'asc', ...filters }) {
     try {

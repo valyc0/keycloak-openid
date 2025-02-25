@@ -2,6 +2,41 @@
 const callTypes = ['Incoming', 'Outgoing', 'Missed'];
 const carriers = ['Verizon', 'AT&T', 'T-Mobile', 'Sprint'];
 const statuses = ['Completed', 'Failed', 'In Progress'];
+const gatewayTypes = ['4G', '5G', 'WiFi', 'Ethernet'];
+const gatewayStatuses = ['Online', 'Offline', 'Maintenance'];
+const meterTypes = ['Electric', 'Water', 'Gas', 'Temperature'];
+
+// Mock data for gateways and related entities
+const mockGateways = Array.from({ length: 20 }, (_, i) => ({
+  id: i + 1,
+  name: `Gateway ${i + 1}`,
+  serial: `GW${String(i + 1).padStart(5, '0')}`,
+  type: gatewayTypes[Math.floor(Math.random() * gatewayTypes.length)],
+  status: gatewayStatuses[Math.floor(Math.random() * gatewayStatuses.length)]
+}));
+
+const mockSites = Array.from({ length: 10 }, (_, i) => ({
+  id: i + 1,
+  name: `Site ${i + 1}`,
+  address: `${i + 100} Main Street`,
+  city: `City ${i + 1}`,
+  country: 'USA'
+}));
+
+const mockMeters = Array.from({ length: 50 }, (_, i) => ({
+  id: i + 1,
+  name: `Meter ${i + 1}`,
+  type: meterTypes[Math.floor(Math.random() * meterTypes.length)],
+  model: `Model-${Math.floor(Math.random() * 5) + 1}`,
+  serialNumber: `MTR${String(i + 1).padStart(5, '0')}`
+}));
+
+const METER_PARAMETERS = [
+  { id: 'interval', name: 'Reading Interval (minutes)', type: 'number', required: true },
+  { id: 'protocol', name: 'Communication Protocol', type: 'string', required: true },
+  { id: 'port', name: 'Port Number', type: 'number', required: true },
+  { id: 'password', name: 'Device Password', type: 'string', required: false }
+];
 
 // Helper function to generate random data
 const generateRandomPhone = () => {
@@ -47,6 +82,39 @@ const delay = (data) => {
 
 // Mock backend functions
 export const mockBackend = {
+  // Gateway related functions
+  getGateways: () => delay({ data: mockGateways }),
+
+  getSites: () => delay({ data: mockSites }),
+
+  getMeters: () => delay({ data: mockMeters }),
+
+  getMeterParameters: () => delay({ data: METER_PARAMETERS }),
+
+  validateGatewayParameters: async (params) => {
+    const errors = {};
+    Object.entries(params).forEach(([meterId, parameters]) => {
+      parameters.forEach(param => {
+        if (param.required && (!param.value || param.value.trim() === '')) {
+          if (!errors[meterId]) errors[meterId] = {};
+          errors[meterId][param.id] = 'This field is required';
+        }
+        if (param.type === 'number' && param.value && isNaN(param.value)) {
+          if (!errors[meterId]) errors[meterId] = {};
+          errors[meterId][param.id] = 'Must be a number';
+        }
+      });
+    });
+    return delay({ data: errors });
+  },
+
+  saveGatewayConfiguration: async (config) => {
+    // In a real implementation, this would save to a backend
+    console.log('Saving gateway configuration:', config);
+    return delay({ data: { success: true, message: 'Configuration saved successfully' }});
+  },
+
+  // Alarm related functions
   // Get paginated alarms with sorting and filtering
   getAlarms: ({ page = 1, pageSize = 10, sortBy = 'id', sortOrder = 'asc', ...filters }) => {
     let filteredAlarms = [...alarms];

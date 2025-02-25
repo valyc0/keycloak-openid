@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import Login from './pages/Login';
 import Dashboard from './components/Dashboard/Dashboard';
 import Alarms from './pages/Alarms';
+import GatewayWizard from './pages/GatewayWizard';
 import Layout from './components/Layout';
 import AuthProvider from './components/AuthProvider';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -43,6 +44,16 @@ function AppRoutes() {
             <ProtectedRoute>
               <Layout>
                 <Alarms />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/gateway-wizard"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <GatewayWizard />
               </Layout>
             </ProtectedRoute>
           }
