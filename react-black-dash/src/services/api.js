@@ -62,5 +62,14 @@ export const alarmService = {
       console.error('Error fetching statuses:', error);
       throw error;
     }
+  },
+
+  async getSuggestions({ field, query }) {
+    try {
+      return await mockBackend.getSuggestions({ field, query });
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+      throw error;
+    }
   }
 };

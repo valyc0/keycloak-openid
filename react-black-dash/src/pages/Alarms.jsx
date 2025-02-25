@@ -66,20 +66,17 @@ const Alarms = () => {
   const [editForm, setEditForm] = useState(initialAlarmState);
 
   // Filter handling functions
-  const handleSearchInputChange = (field, value) => {
+  const handleSearchInputChange = async (field, value) => {
     setSearchInputs(prev => ({ ...prev, [field]: value }));
-    // Generate suggestions based on the current data
-    if (value.trim()) {
-      const fieldSuggestions = alarms
-        .map(alarm => alarm[field])
-        .filter((val, index, self) => 
-          val && 
-          val.toString().toLowerCase().includes(value.toLowerCase()) &&
-          self.indexOf(val) === index
-        )
-        .slice(0, 5);
-      setSuggestions(prev => ({ ...prev, [field]: fieldSuggestions }));
-    } else {
+    try {
+      if (value.trim()) {
+        const response = await alarmService.getSuggestions({ field, query: value });
+        setSuggestions(prev => ({ ...prev, [field]: response.data }));
+      } else {
+        setSuggestions(prev => ({ ...prev, [field]: [] }));
+      }
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
       setSuggestions(prev => ({ ...prev, [field]: [] }));
     }
   };

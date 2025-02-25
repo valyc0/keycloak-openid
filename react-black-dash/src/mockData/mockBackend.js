@@ -144,5 +144,20 @@ export const mockBackend = {
   getCarriers: () => delay({ data: carriers }),
 
   // Get statuses
-  getStatuses: () => delay({ data: statuses })
+  getStatuses: () => delay({ data: statuses }),
+
+  // Get suggestions for a field
+  getSuggestions: ({ field, query, limit = 5 }) => {
+    // Get unique values for the field that match the query
+    const suggestions = [...new Set(
+      alarms
+        .map(alarm => alarm[field])
+        .filter(value =>
+          value &&
+          String(value).toLowerCase().includes(String(query).toLowerCase())
+        )
+    )].slice(0, limit);
+
+    return delay({ data: suggestions });
+  }
 };
