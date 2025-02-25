@@ -5,6 +5,11 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 8081
+    port: 8081,
+    host: true,
+    allowedHosts: [
+      'localhost',
+      '.gitpod.io'
+    ]
   }
 })

@@ -1,4 +1,4 @@
-import { useAuth } from 'react-oidc-context';
+import { useAuth } from './AuthProvider';
 import { Navigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 

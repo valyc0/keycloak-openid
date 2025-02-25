@@ -1,4 +1,4 @@
-import { useAuth } from 'react-oidc-context';
+import { useAuth } from '../components/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import '../assets/css/cs-skin-elastic.css';
@@ -31,7 +31,7 @@ const Login = () => {
   }
 
   const handleLogin = () => {
-    auth.signinRedirect();
+    auth.login();
   };
 
   return (
