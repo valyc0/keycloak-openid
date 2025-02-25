@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { gatewayService } from '../../services/api';
 import GenericTable from '../GenericCrud/GenericTable';
 import GenericFilters from '../GenericCrud/GenericFilters';
+import '../Header/Header.css';
 
 const SelectGateway = ({
   selectedGateway,
@@ -118,18 +119,29 @@ const SelectGateway = ({
           </div>
         )}
 
-        <GenericFilters
-          searchInputs={searchInputs}
-          filters={filters}
-          filterFields={getFilterFields()}
-          showSuggestions={showSuggestions}
-          suggestions={suggestions}
-          onSearchInputChange={handleSearchInputChange}
-          onFilterChange={() => {}}
-          onSuggestionClick={() => {}}
-          onShowSuggestionsChange={() => {}}
-          onClearFilters={handleClearFilters}
-        />
+        <div className="mb-4">
+          <input
+            type="text"
+            className="form-control search-input"
+            placeholder="Search..."
+            value={searchInputs.search || ''}
+            onChange={(e) => handleSearchInputChange('search', e.target.value)}
+            style={{ width: '200px' }}
+          />
+          <small className="text-muted">
+            {isLoading ? (
+              <span>
+                <i className="fa fa-spinner fa-spin mr-1"></i>
+                Searching...
+              </span>
+            ) : (
+              <span>
+                Found {totalGateways} gateways
+                {filters.search ? ` matching "${filters.search}"` : ''}
+              </span>
+            )}
+          </small>
+        </div>
 
         <GenericTable
           columns={columns}

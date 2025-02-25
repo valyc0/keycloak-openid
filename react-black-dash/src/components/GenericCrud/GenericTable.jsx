@@ -145,8 +145,8 @@ const GenericTable = ({
           </div>
         </div>
       )}
-      <div className={`table-responsive ${isLoading ? 'opacity-50' : ''}`}>
-        <table className="table table-striped w-100">
+      <div className={`table-responsive ${isLoading ? 'opacity-50' : ''}`} style={{ transition: 'opacity 0.2s ease-in-out' }}>
+        <table className="table table-hover w-100">
           <thead>
             <tr>
               {columns.map((column) => (
@@ -162,25 +162,27 @@ const GenericTable = ({
                   }}
                 >
                   <div
+                    className="d-flex align-items-center justify-content-between py-2"
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
                       width: '100%',
                       cursor: onSort ? 'pointer' : 'default',
-                      padding: '4px 0',
-                      userSelect: 'none'
+                      userSelect: 'none',
+                      transition: 'color 0.2s ease-in-out'
                     }}
                   >
-                    {column.label}
-                    <span style={{
-                      color: sortBy === column.key ? '#0d6efd' : '#666',
-                      marginLeft: '8px',
-                      fontWeight: 'bold',
-                      fontSize: '16px'
-                    }}>
-                      {renderSortIcon(column)}
-                    </span>
+                    <span className="font-weight-bold">{column.label}</span>
+                    {onSort && (
+                      <span
+                        className={`ml-2 ${sortBy === column.key ? 'text-primary' : 'text-muted'}`}
+                        style={{
+                          fontSize: '0.8rem',
+                          transition: 'transform 0.2s ease-in-out, color 0.2s ease-in-out',
+                          transform: sortBy === column.key && sortOrder === 'desc' ? 'rotate(180deg)' : 'none'
+                        }}
+                      >
+                        <i className="fas fa-sort-up"></i>
+                      </span>
+                    )}
                   </div>
                 </th>
               ))}
@@ -192,8 +194,11 @@ const GenericTable = ({
               <tr
                 key={item.id}
                 onClick={() => onRowClick && onRowClick(item)}
-                style={{ cursor: onRowClick ? 'pointer' : 'default' }}
-                className={getRowClassName ? getRowClassName(item) : ''}
+                style={{
+                  cursor: onRowClick ? 'pointer' : 'default',
+                  transition: 'background-color 0.2s ease-in-out'
+                }}
+                className={`${getRowClassName ? getRowClassName(item) : ''} align-middle`}
               >
                 {columns.map((column) => (
                   <td key={`${item.id}-${column.key}`}>
