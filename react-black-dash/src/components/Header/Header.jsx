@@ -64,9 +64,6 @@ const Header = ({ onToggleSidebar, sidebarCollapsed }) => {
         />
       </div>
       <div className="d-flex align-items-center">
-        <button className="btn btn-rounded btn-primary text-white me-3">
-          <i className="fas fa-plus me-2"></i>Add New
-        </button>
         <div className="dropdown">
           <div 
             className={`d-flex align-items-center dropdown-toggle ${isDropdownOpen ? 'show' : ''}`}
