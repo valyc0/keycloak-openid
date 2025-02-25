@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { gatewayService } from '../../services/api';
 import GenericTable from '../GenericCrud/GenericTable';
 import GenericFilters from '../GenericCrud/GenericFilters';
-import '../Header/Header.css';
+import './GatewayWizard.css';
 
 const SelectGateway = ({
   selectedGateway,

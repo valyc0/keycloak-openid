@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { gatewayService } from '../../services/api';
+import './GatewayWizard.css';
 
 const GatewaySiteDetails = ({
   gatewayName,
