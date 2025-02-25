@@ -10,41 +10,13 @@ import SummaryDisplay from './SummaryDisplay';
 const GatewayWizard = () => {
   const [step, setStep] = useState(1);
   const [selectedGateway, setSelectedGateway] = useState(null);
-  const [query, setQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [configJson, setConfigJson] = useState('');
   const [gatewayName, setGatewayName] = useState('');
   const [selectedSite, setSelectedSite] = useState(null);
   const [selectedMeters, setSelectedMeters] = useState([]);
   const [meterParams, setMeterParams] = useState({});
-  const [gateways, setGateways] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchGateways = async () => {
-      try {
-        const response = await gatewayService.getGateways();
-        setGateways(response.data);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching gateways:', err);
-        setError('Failed to load gateways');
-        setLoading(false);
-      }
-    };
-
-    fetchGateways();
-  }, []);
-
-  const filteredGateways =
-    query === ''
-      ? gateways
-      : gateways.filter(
-          (g) =>
-            g.name.toLowerCase().includes(query.toLowerCase()) ||
-            g.serial.toLowerCase().includes(query.toLowerCase())
-        );
 
   const handleMeterSelect = (meter) => {
     setSelectedMeters((prev) => [...prev, meter]);
@@ -102,6 +74,7 @@ const GatewayWizard = () => {
       }
     } catch (err) {
       console.error('Error submitting gateway configuration:', err);
+      setError('Failed to save gateway configuration. Please try again.');
     }
   };
 
@@ -124,25 +97,6 @@ const GatewayWizard = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="text-center p-5">
-        <div className="spinner-border text-primary" role="status">
-          <span className="sr-only">Loading...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="alert alert-danger m-4" role="alert">
-        <i className="fa fa-exclamation-triangle mr-2"></i>
-        {error}
-      </div>
-    );
-  }
-
   const renderStep = () => {
     switch (step) {
       case 1:
@@ -153,9 +107,6 @@ const GatewayWizard = () => {
               setSelectedGateway(gateway);
               setGatewayName(gateway.name);
             }}
-            query={query}
-            onQueryChange={setQuery}
-            filteredGateways={filteredGateways}
           />
         );
       case 2:
@@ -198,6 +149,13 @@ const GatewayWizard = () => {
         isNextDisabled={isNextDisabled()}
         isSubmit={step === 4}
       />
+
+      {error && (
+        <div className="alert alert-danger mt-3" role="alert">
+          <i className="fa fa-exclamation-triangle mr-2"></i>
+          {error}
+        </div>
+      )}
 
       {selectedGateway && (
         <SummaryDisplay

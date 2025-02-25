@@ -83,7 +83,36 @@ const delay = (data) => {
 // Mock backend functions
 export const mockBackend = {
   // Gateway related functions
-  getGateways: () => delay({ data: mockGateways }),
+  getGateways: ({ query = '', page = 1, pageSize = 10, sortBy = 'name', sortOrder = 'asc' }) => {
+    if (!query || query.length < 3) {
+      return delay({ data: [], total: 0, page, pageSize });
+    }
+    
+    let filteredGateways = mockGateways.filter(gateway =>
+      gateway.name.toLowerCase().includes(query.toLowerCase()) ||
+      gateway.serial.toLowerCase().includes(query.toLowerCase())
+    );
+
+    // Apply sorting
+    filteredGateways.sort((a, b) => {
+      if (typeof a[sortBy] === 'string') {
+        const compareResult = a[sortBy].localeCompare(b[sortBy]);
+        return sortOrder === 'asc' ? compareResult : -compareResult;
+      }
+      return sortOrder === 'asc' ? a[sortBy] - b[sortBy] : b[sortBy] - a[sortBy];
+    });
+
+    // Apply pagination
+    const start = (page - 1) * pageSize;
+    const paginatedGateways = filteredGateways.slice(start, start + pageSize);
+    
+    return delay({
+      data: paginatedGateways,
+      total: filteredGateways.length,
+      page,
+      pageSize
+    });
+  },
 
   getSites: () => delay({ data: mockSites }),
 

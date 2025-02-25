@@ -13,7 +13,9 @@ const GenericTable = ({
   sortBy,
   sortOrder,
   onSort,
-  isLoading
+  isLoading,
+  showActions = true,
+  onRowClick = null
 }) => {
   const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -181,37 +183,51 @@ const GenericTable = ({
                   </div>
                 </th>
               ))}
-              <th style={{ width: '100px' }}>Actions</th>
+              {showActions && <th style={{ width: '100px' }}>Actions</th>}
             </tr>
           </thead>
           <tbody>
             {data.map((item) => (
-              <tr key={item.id}>
+              <tr 
+                key={item.id}
+                onClick={() => onRowClick && onRowClick(item)}
+                style={{ cursor: onRowClick ? 'pointer' : 'default' }}
+              >
                 {columns.map((column) => (
                   <td key={`${item.id}-${column.key}`}>
-                    {formatValue(item[column.key], column)}
+                    {column.render ? column.render(item) : formatValue(item[column.key], column)}
                   </td>
                 ))}
-                <td>
-                  <button
-                    className="btn btn-link text-warning p-0 ms-2"
-                    onClick={() => onEdit(item)}
-                    title="Edit"
-                  >
-                    <i className="fas fa-edit"></i>
-                  </button>
-                  <button
-                    className="btn btn-link text-danger p-0 ms-2"
-                    onClick={() => {
-                      if (window.confirm('Are you sure you want to delete this item?')) {
-                        onDelete(item.id);
-                      }
-                    }}
-                    title="Delete"
-                  >
-                    <i className="fas fa-trash"></i>
-                  </button>
-                </td>
+                {showActions && (
+                  <td>
+                    {onEdit && (
+                      <button
+                        className="btn btn-link text-warning p-0 ms-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit(item);
+                        }}
+                        title="Edit"
+                      >
+                        <i className="fas fa-edit"></i>
+                      </button>
+                    )}
+                    {onDelete && (
+                      <button
+                        className="btn btn-link text-danger p-0 ms-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm('Are you sure you want to delete this item?')) {
+                            onDelete(item.id);
+                          }
+                        }}
+                        title="Delete"
+                      >
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

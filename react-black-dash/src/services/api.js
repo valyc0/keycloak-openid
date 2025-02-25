@@ -1,9 +1,9 @@
 import { mockBackend } from '../mockData/mockBackend';
 
 export const gatewayService = {
-  async getGateways() {
+  async searchGateways({ query = '', page = 1, pageSize = 10, sortBy = 'name', sortOrder = 'asc' }) {
     try {
-      return await mockBackend.getGateways();
+      return await mockBackend.getGateways({ query, page, pageSize, sortBy, sortOrder });
     } catch (error) {
       console.error('Error fetching gateways:', error);
       throw error;

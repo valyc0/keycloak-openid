@@ -1,66 +1,158 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { gatewayService } from '../../services/api';
+import GenericTable from '../GenericCrud/GenericTable';
+import GenericFilters from '../GenericCrud/GenericFilters';
 
 const SelectGateway = ({
   selectedGateway,
   onSelect,
-  query,
-  onQueryChange,
-  filteredGateways,
 }) => {
+  const [gateways, setGateways] = useState([]);
+  const [totalGateways, setTotalGateways] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [pageSize] = useState(10);
+  const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({});
+  const [searchInputs, setSearchInputs] = useState({});
+  const [showSuggestions, setShowSuggestions] = useState({});
+  const [suggestions, setSuggestions] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const getFilterFields = () => [
+    { key: 'search', label: 'Search Gateway', type: 'text' }
+  ];
+
+  // Fetch gateways data
+  const fetchGateways = async (newFilters = {}) => {
+    setError(null);
+    setIsLoading(true);
+    const searchQuery = newFilters.search || filters.search || '';
+    
+    try {
+      const response = await gatewayService.searchGateways({
+        query: searchQuery,
+        page: currentPage,
+        pageSize,
+        sortBy,
+        sortOrder
+      });
+      setGateways(response.data);
+      setTotalGateways(response.total);
+      setError(null);
+    } catch (err) {
+      setError('Error fetching gateways');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (filters.search && filters.search.length >= 3) {
+      fetchGateways();
+    } else {
+      setGateways([]);
+      setTotalGateways(0);
+    }
+  }, [currentPage, sortBy, sortOrder, filters.search]);
+
+  // Filter handling functions
+  const handleSearchInputChange = (field, value) => {
+    setSearchInputs(prev => ({ ...prev, [field]: value }));
+    if (value.length >= 3) {
+      setFilters(prev => ({ ...prev, [field]: value }));
+      setCurrentPage(1);
+    } else {
+      setGateways([]);
+      setTotalGateways(0);
+    }
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+    setSearchInputs({});
+    setSuggestions({});
+    setCurrentPage(1);
+    setGateways([]);
+    setTotalGateways(0);
+  };
+
+  const columns = [
+    { key: 'name', label: 'Gateway Name' },
+    { key: 'serial', label: 'Serial Number' },
+    { key: 'type', label: 'Type' },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (gateway) => (
+        <span className={`badge badge-${gateway.status === 'Online' ? 'success' : 'danger'}`}>
+          {gateway.status}
+        </span>
+      )
+    }
+  ];
+
   return (
     <div className="card">
       <div className="card-header">
         <strong className="card-title">Select Gateway</strong>
       </div>
       <div className="card-body">
-        <div className="form-group">
-          <div className="input-group mb-3">
-            <div className="input-group-prepend">
-              <span className="input-group-text">
-                <i className="fa fa-search"></i>
-              </span>
-            </div>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search gateways..."
-              value={query}
-              onChange={(e) => onQueryChange(e.target.value)}
-            />
+        {error && (
+          <div className="alert alert-danger" role="alert">
+            {error}
           </div>
-          
-          <div className="gateway-list mt-3" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-            {filteredGateways.map((gateway) => (
-              <div
-                key={gateway.id}
-                className={`gateway-item p-3 mb-2 rounded cursor-pointer ${
-                  selectedGateway?.id === gateway.id
-                    ? 'bg-primary text-white'
-                    : 'bg-light'
-                }`}
-                onClick={() => onSelect(gateway)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="d-flex align-items-center">
-                  {selectedGateway?.id === gateway.id && (
-                    <i className="fa fa-check mr-2"></i>
-                  )}
-                  <div>
-                    <div className="font-weight-bold">{gateway.name}</div>
-                    <div className={`small ${selectedGateway?.id === gateway.id ? 'text-white-50' : 'text-muted'}`}>
-                      Serial: {gateway.serial}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {filteredGateways.length === 0 && (
-              <div className="text-center text-muted p-3">
-                No gateways found
-              </div>
-            )}
+        )}
+
+        <GenericFilters
+          searchInputs={searchInputs}
+          filters={filters}
+          filterFields={getFilterFields()}
+          showSuggestions={showSuggestions}
+          suggestions={suggestions}
+          onSearchInputChange={handleSearchInputChange}
+          onFilterChange={() => {}}
+          onSuggestionClick={() => {}}
+          onShowSuggestionsChange={() => {}}
+          onClearFilters={handleClearFilters}
+        />
+
+        {!filters.search && (
+          <div className="alert alert-info mt-3">
+            <i className="fa fa-info-circle mr-2"></i>
+            Type at least 3 characters to search for gateways
           </div>
-        </div>
+        )}
+
+        {filters.search && filters.search.length >= 3 && (
+          <GenericTable
+            columns={columns}
+            data={gateways}
+            onRowClick={(gateway) => onSelect(gateway)}
+            selectedId={selectedGateway?.id}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalItems={totalGateways}
+            onPageChange={setCurrentPage}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onSort={(key) => {
+              const newOrder = sortBy === key && sortOrder === 'asc' ? 'desc' : 'asc';
+              setSortBy(key);
+              setSortOrder(newOrder);
+            }}
+            isLoading={isLoading}
+            hoverable={true}
+            showActions={false}
+            displayOptions={{
+              showEdit: false,
+              showDelete: false,
+              showActions: false
+            }}
+          />
+        )}
       </div>
     </div>
   );
