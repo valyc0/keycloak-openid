@@ -47,20 +47,19 @@ const Header = ({ onToggleSidebar, sidebarCollapsed }) => {
 
   return (
     <div className={`header d-flex justify-content-between align-items-center ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-      <div>
-        <button 
-          className="btn text-white" 
+      <div className="d-flex align-items-center">
+        <button
+          className="btn btn-link text-white d-md-none me-2"
           onClick={onToggleSidebar}
           data-sidebar-toggle
-          style={{ padding: '4px 8px' }}
         >
           <i className="fas fa-bars"></i>
         </button>
-        <input 
-          type="text" 
-          className="form-control search-input d-inline-block ms-2" 
-          placeholder="Search..." 
-          style={{ width: '200px' }} 
+        <input
+          type="text"
+          className="form-control search-input"
+          placeholder="Search..."
+          style={{ width: '200px' }}
         />
       </div>
       <div className="d-flex align-items-center">

@@ -57,14 +57,15 @@ const Layout = ({ children }) => {
 
   return (
     <div className="app">
-      <Sidebar 
-        isCollapsed={isSidebarCollapsed} 
+      <Sidebar
+        isCollapsed={isSidebarCollapsed}
         isMobile={isMobile}
         isSidebarOpen={isSidebarOpen}
+        onToggleSidebar={handleToggleSidebar}
       />
       <div className={`wrapper ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         <div className={`main-content ${isSidebarCollapsed ? 'expanded' : ''}`}>
-          <Header 
+          <Header
             onToggleSidebar={handleToggleSidebar}
             sidebarCollapsed={isSidebarCollapsed}
           />
