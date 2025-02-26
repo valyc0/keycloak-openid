@@ -5,6 +5,7 @@ const SelectMeters = ({
   selectedMeters,
   onMeterSelect,
   onMeterParametersInit,
+  onMeterRemove,
 }) => {
   const [meters, setMeters] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -100,6 +101,7 @@ const SelectMeters = ({
                     <th>Type</th>
                     <th>Model</th>
                     <th>Serial Number</th>
+                    <th className="text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -112,6 +114,16 @@ const SelectMeters = ({
                       <td>{meter.model}</td>
                       <td>
                         <code>{meter.serialNumber}</code>
+                      </td>
+                      <td className="text-right">
+                        <button
+                          type="button"
+                          className="btn btn-danger btn-sm"
+                          onClick={() => onMeterRemove(meter.id)}
+                          title="Remove meter"
+                        >
+                          <i className="fa fa-trash"></i>
+                        </button>
                       </td>
                     </tr>
                   ))}

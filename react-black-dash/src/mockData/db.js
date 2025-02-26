@@ -23,10 +23,38 @@ export const mockMeters = Array.from({ length: 50 }, (_, i) => ({
 }));
 
 export const METER_PARAMETERS = [
-  { id: 'interval', name: 'Reading Interval (minutes)', type: 'number', required: true },
-  { id: 'protocol', name: 'Communication Protocol', type: 'string', required: true },
-  { id: 'port', name: 'Port Number', type: 'number', required: true },
-  { id: 'password', name: 'Device Password', type: 'string', required: false }
+  {
+    id: 'interval',
+    name: 'Reading Interval (minutes)',
+    type: 'number',
+    required: true,
+    min: 1,
+    max: 60,
+    value: '15'  // Default value
+  },
+  {
+    id: 'protocol',
+    name: 'Communication Protocol',
+    type: 'string',
+    required: true,
+    value: 'MODBUS'  // Default value
+  },
+  {
+    id: 'port',
+    name: 'Port Number',
+    type: 'number',
+    required: true,
+    min: 1,
+    max: 65535,
+    value: '502'  // Default value
+  },
+  {
+    id: 'password',
+    name: 'Device Password',
+    type: 'string',
+    required: false,
+    value: ''  // Default empty
+  }
 ];
 
 // Mock gateways data

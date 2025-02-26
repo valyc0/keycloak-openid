@@ -91,20 +91,46 @@ const mockApiHandler = async (config) => {
   }
 
   if (path === '/gateways/validate' && method?.toLowerCase() === 'post') {
+    console.log('[Mock API] Validating gateway parameters:', data);
     const errors = {};
+    let hasErrors = false;
+    
     Object.entries(data).forEach(([meterId, parameters]) => {
       parameters.forEach(param => {
         if (param.required && (!param.value || param.value.trim() === '')) {
           if (!errors[meterId]) errors[meterId] = {};
           errors[meterId][param.id] = 'This field is required';
+          hasErrors = true;
         }
-        if (param.type === 'number' && param.value && isNaN(param.value)) {
-          if (!errors[meterId]) errors[meterId] = {};
-          errors[meterId][param.id] = 'Must be a number';
+        if (param.type === 'number' && param.value) {
+          if (isNaN(param.value)) {
+            if (!errors[meterId]) errors[meterId] = {};
+            errors[meterId][param.id] = 'Must be a number';
+            hasErrors = true;
+          } else {
+            const numValue = Number(param.value);
+            if (param.min !== undefined && numValue < param.min) {
+              if (!errors[meterId]) errors[meterId] = {};
+              errors[meterId][param.id] = `Must be at least ${param.min}`;
+              hasErrors = true;
+            }
+            if (param.max !== undefined && numValue > param.max) {
+              if (!errors[meterId]) errors[meterId] = {};
+              errors[meterId][param.id] = `Must be at most ${param.max}`;
+              hasErrors = true;
+            }
+          }
         }
       });
     });
-    return delayResponse({ data: errors });
+
+    console.log('[Mock API] Validation result:', { hasErrors, errors });
+    return delayResponse({
+      data: {
+        valid: !hasErrors,
+        errors: errors
+      }
+    });
   }
 
   if (path === '/gateways/configure' && method?.toLowerCase() === 'post') {

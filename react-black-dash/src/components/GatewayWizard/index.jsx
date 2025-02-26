@@ -22,13 +22,37 @@ const GatewayWizard = () => {
     setSelectedMeters((prev) => [...prev, meter]);
   };
 
-  const handleMeterParametersInit = (meterId) => {
-    gatewayService.getMeterParameters().then((response) => {
-      setMeterParams((prev) => ({
-        ...prev,
-        [meterId]: response.data.map((p) => ({ ...p })),
-      }));
+  const handleMeterRemove = (meterId) => {
+    setSelectedMeters((prev) => prev.filter(m => m.id !== meterId));
+    setMeterParams((prev) => {
+      const newParams = { ...prev };
+      delete newParams[meterId];
+      return newParams;
     });
+  };
+
+  const handleMeterParametersInit = async (meterId) => {
+    try {
+      console.log('Initializing parameters for meter:', meterId);
+      const response = await gatewayService.getMeterParameters();
+      
+      // Initialize parameters with default values
+      const initializedParams = response.data.map(param => ({
+        ...param,
+        error: undefined,
+        value: param.value || ''  // Use default value from mock data or empty string
+      }));
+
+      console.log('Initialized parameters:', initializedParams);
+      
+      setMeterParams(prev => ({
+        ...prev,
+        [meterId]: initializedParams
+      }));
+    } catch (err) {
+      console.error('Error initializing meter parameters:', err);
+      setError('Failed to initialize meter parameters. Please try again.');
+    }
   };
 
   const handleParameterChange = (meterId, parameterId, value) => {
@@ -42,19 +66,45 @@ const GatewayWizard = () => {
 
   const handleSubmit = async () => {
     try {
+      setError(null); // Clear any previous errors
+
+      // Initial validation
+      const missingParams = selectedMeters.some(meter => !meterParams[meter.id]);
+      if (missingParams) {
+        setError('Some meters are missing parameters. Please ensure all meters are configured.');
+        return;
+      }
+
+      // Check for empty required fields
+      const invalidParams = selectedMeters.some(meter =>
+        meterParams[meter.id].some(param =>
+          param.required && (!param.value || param.value.trim() === '')
+        )
+      );
+      if (invalidParams) {
+        setError('Please fill in all required parameters for each meter.');
+        return;
+      }
+
+      // Server-side validation
+      console.log('Validating parameters...', meterParams);
       const validationResponse = await gatewayService.validateGatewayParameters(meterParams);
-      if (Object.keys(validationResponse.data).length > 0) {
+      console.log('Validation response:', validationResponse);
+
+      if (!validationResponse.data.valid) {
         const updatedParams = { ...meterParams };
-        Object.entries(validationResponse.data).forEach(([meterId, errors]) => {
+        Object.entries(validationResponse.data.errors).forEach(([meterId, errors]) => {
           updatedParams[meterId] = meterParams[meterId].map((param) => ({
             ...param,
             error: errors[param.id],
           }));
         });
         setMeterParams(updatedParams);
+        setError('Please fix the validation errors before proceeding.');
         return;
       }
 
+      // Prepare configuration
       const config = {
         gateway: {
           ...selectedGateway,
@@ -67,14 +117,21 @@ const GatewayWizard = () => {
         },
       };
 
+      // Submit configuration
+      console.log('Submitting configuration:', config);
       const response = await gatewayService.saveGatewayConfiguration(config);
+      console.log('Save response:', response);
+
       if (response.data.success) {
         setConfigJson(JSON.stringify(config, null, 2));
         setIsModalOpen(true);
+      } else {
+        setError('Failed to save configuration. Server did not return success.');
       }
     } catch (err) {
       console.error('Error submitting gateway configuration:', err);
-      setError('Failed to save gateway configuration. Please try again.');
+      const errorMessage = err.response?.data?.message || err.message || 'Unknown error';
+      setError(`Failed to save gateway configuration: ${errorMessage}`);
     }
   };
 
@@ -124,6 +181,7 @@ const GatewayWizard = () => {
             selectedMeters={selectedMeters}
             onMeterSelect={handleMeterSelect}
             onMeterParametersInit={handleMeterParametersInit}
+            onMeterRemove={handleMeterRemove}
           />
         );
       case 4:
@@ -169,37 +227,54 @@ const GatewayWizard = () => {
       {renderStep()}
 
       {isModalOpen && (
-        <div className="modal d-block" tabIndex="-1" role="dialog">
-          <div className="modal-dialog modal-lg" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Configuration</h5>
-                <button
-                  type="button"
-                  className="close"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  <span aria-hidden="true">&times;</span>
-                </button>
+            <>
+              <div
+                className="modal d-block"
+                tabIndex="-1"
+                role="dialog"
+                style={{ zIndex: 1050 }}
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) {
+                    setIsModalOpen(false);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setIsModalOpen(false);
+                  }
+                }}
+              >
+                <div className="modal-dialog modal-lg" role="document">
+                  <div className="modal-content">
+                    <div className="modal-header">
+                      <h5 className="modal-title">Configuration</h5>
+                      <button
+                        type="button"
+                        className="close"
+                        onClick={() => setIsModalOpen(false)}
+                      >
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div className="modal-body">
+                      <pre className="bg-light p-3 rounded">
+                        <code>{configJson}</code>
+                      </pre>
+                    </div>
+                    <div className="modal-footer">
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => setIsModalOpen(false)}
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="modal-body">
-                <pre className="bg-light p-3 rounded">
-                  <code>{configJson}</code>
-                </pre>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="modal-backdrop show"></div>
-        </div>
+              <div className="modal-backdrop show" style={{ zIndex: 1040 }}></div>
+            </>
       )}
     </div>
   );
