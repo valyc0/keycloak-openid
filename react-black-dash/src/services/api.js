@@ -1,9 +1,60 @@
 import axios from 'axios';
 
-// Create axios instance
+/**
+ * API Configuration and Service Module
+ * @module api
+ */
+
+// Validate required environment variables
+if (!import.meta.env.VITE_EXTERNAL_API_URL) {
+  throw new Error('VITE_EXTERNAL_API_URL environment variable is required');
+}
+
+// Validate API URL format
+try {
+  new URL(import.meta.env.VITE_EXTERNAL_API_URL);
+} catch (error) {
+  throw new Error(`Invalid VITE_EXTERNAL_API_URL format: ${error.message}`);
+}
+
+/** @type {import('axios').AxiosInstance} */
 const api = axios.create({
-  baseURL: '/api'
+  baseURL: import.meta.env.VITE_EXTERNAL_API_URL,
+  timeout: 10000, // 10 second timeout
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
+
+// Error interceptor for common API errors
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response) {
+      // Server responded with non-2xx status
+      console.error('[API Error]', {
+        status: error.response.status,
+        data: error.response.data,
+        endpoint: error.config.url
+      });
+    } else if (error.request) {
+      // Request made but no response received
+      console.error('[API Error] No response received:', error.request);
+    } else {
+      // Error in request configuration
+      console.error('[API Error] Request configuration error:', error.message);
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Development logging
+if (import.meta.env.DEV) {
+  console.log('[API] Configuration:', {
+    baseURL: import.meta.env.VITE_EXTERNAL_API_URL,
+    mockEnabled: import.meta.env.VITE_USE_FAKE_BACKEND === 'true'
+  });
+}
 
 // Service functions
 export const gatewayService = {

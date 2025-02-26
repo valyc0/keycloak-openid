@@ -38,7 +38,8 @@ const mockApiHandler = async (config) => {
   const data = parseData(config.data);
 
   // Remove baseURL from url for processing
-  const path = url?.replace('/api', '') || '';
+  const baseUrl = new URL(import.meta.env.VITE_EXTERNAL_API_URL).pathname;
+  const path = url?.replace(baseUrl, '') || '';
   
   // Log the incoming request
   console.log(`[Mock API] Processing ${method?.toUpperCase()} ${path}`);
@@ -120,7 +121,7 @@ const mockApiHandler = async (config) => {
     if (path === '/alarms/call-types') {
       return delayResponse({ data: alarmOptions.callTypes });
     }
-    if (path === '/alarms/carriers1111') {
+    if (path === '/alarms/carriers') {
       return delayResponse({ data: alarmOptions.carriers });
     }
     if (path === '/alarms/statuses') {
@@ -239,9 +240,14 @@ export const setupFakeBackend = (api) => {
       });
     } catch (error) {
       if (error.message === 'MOCK_HANDLER_NOT_FOUND') {
-        // If no mock handler was found, let the request continue to real API
-        console.log(`[Mock API] No handler found for ${config.method?.toUpperCase()} ${config.url} - forwarding to real API`);
-        return config;
+        // If no mock handler was found, forward to real external API
+        const externalUrl = import.meta.env.VITE_EXTERNAL_API_URL;
+        console.log(`[Mock API] No handler found for ${config.method?.toUpperCase()} ${config.url}`);
+        console.log(`[Mock API] Forwarding to external API: ${externalUrl}`);
+// Create new config for external API
+// Keep the original baseURL from api.js to maintain consistency
+return config;
+        return externalConfig;
       }
       return Promise.reject(error);
     }
