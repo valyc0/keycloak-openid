@@ -84,26 +84,12 @@ const Sidebar = ({ isCollapsed, isMobile, isSidebarOpen, onToggleSidebar }) => {
           <i className="fas fa-tachometer-alt" aria-hidden="true"></i>
           <span>Dashboard</span>
         </Link>
-        <Link 
-          to="/alarms" 
+        <Link
+          to="/alarms"
           className={`nav-link ${location.pathname === '/alarms' ? 'active' : ''}`}
         >
           <i className="fas fa-bell" aria-hidden="true"></i>
           <span>Alarms</span>
-        </Link>
-        <Link 
-          to="/profile" 
-          className={`nav-link ${location.pathname === '/profile' ? 'active' : ''}`}
-        >
-          <i className="fas fa-user" aria-hidden="true"></i>
-          <span>User Profile</span>
-        </Link>
-        <Link 
-          to="/analytics" 
-          className={`nav-link ${location.pathname === '/analytics' ? 'active' : ''}`}
-        >
-          <i className="fas fa-chart-bar" aria-hidden="true"></i>
-          <span>Analytics</span>
         </Link>
         <Link
           to="/gateway-wizard"
@@ -111,6 +97,20 @@ const Sidebar = ({ isCollapsed, isMobile, isSidebarOpen, onToggleSidebar }) => {
         >
           <i className="fas fa-server" aria-hidden="true"></i>
           <span>Gateway Wizard</span>
+        </Link>
+        <Link
+          to="/profile"
+          className={`nav-link ${location.pathname === '/profile' ? 'active' : ''}`}
+        >
+          <i className="fas fa-user" aria-hidden="true"></i>
+          <span>User Profile</span>
+        </Link>
+        <Link
+          to="/analytics"
+          className={`nav-link ${location.pathname === '/analytics' ? 'active' : ''}`}
+        >
+          <i className="fas fa-chart-bar" aria-hidden="true"></i>
+          <span>Analytics</span>
         </Link>
         <Link
           to="/settings"
