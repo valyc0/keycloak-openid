@@ -86,7 +86,6 @@ export const mockBackend = {
   getGateways: ({ query = '', page = 1, pageSize = 10, sortBy = 'name', sortOrder = 'asc' }) => {
     let filteredGateways = [...mockGateways];
     
-    // Apply search filter if query is provided and has 3 or more characters
     if (query && query.length >= 3) {
       filteredGateways = filteredGateways.filter(gateway =>
         gateway.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -94,7 +93,6 @@ export const mockBackend = {
       );
     }
 
-    // Apply sorting
     filteredGateways.sort((a, b) => {
       if (typeof a[sortBy] === 'string') {
         const compareResult = a[sortBy].localeCompare(b[sortBy]);
@@ -103,7 +101,6 @@ export const mockBackend = {
       return sortOrder === 'asc' ? a[sortBy] - b[sortBy] : b[sortBy] - a[sortBy];
     });
 
-    // Apply pagination
     const start = (page - 1) * pageSize;
     const paginatedGateways = filteredGateways.slice(start, start + pageSize);
     
@@ -116,9 +113,7 @@ export const mockBackend = {
   },
 
   getSites: () => delay({ data: mockSites }),
-
   getMeters: () => delay({ data: mockMeters }),
-
   getMeterParameters: () => delay({ data: METER_PARAMETERS }),
 
   validateGatewayParameters: async (params) => {
@@ -139,17 +134,14 @@ export const mockBackend = {
   },
 
   saveGatewayConfiguration: async (config) => {
-    // In a real implementation, this would save to a backend
     console.log('Saving gateway configuration:', config);
     return delay({ data: { success: true, message: 'Configuration saved successfully' }});
   },
 
   // Alarm related functions
-  // Get paginated alarms with sorting and filtering
   getAlarms: ({ page = 1, pageSize = 10, sortBy = 'id', sortOrder = 'asc', ...filters }) => {
     let filteredAlarms = [...alarms];
 
-    // Apply filters
     Object.keys(filters).forEach(key => {
       if (filters[key]) {
         filteredAlarms = filteredAlarms.filter(alarm => 
@@ -158,17 +150,14 @@ export const mockBackend = {
       }
     });
 
-    // Apply sorting
     filteredAlarms.sort((a, b) => {
       const aValue = a[sortBy];
       const bValue = b[sortBy];
 
-      // Handle null/undefined values
       if (aValue === null || aValue === undefined) return sortOrder === 'asc' ? 1 : -1;
       if (bValue === null || bValue === undefined) return sortOrder === 'asc' ? -1 : 1;
 
       try {
-        // Handle different data types
         if (typeof aValue === 'number' && typeof bValue === 'number') {
           return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
         }
@@ -179,7 +168,6 @@ export const mockBackend = {
           return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
         }
         
-        // Default string comparison
         const aString = String(aValue).toLowerCase();
         const bString = String(bValue).toLowerCase();
         if (aString === bString) return 0;
@@ -191,7 +179,6 @@ export const mockBackend = {
       }
     });
 
-    // Apply pagination
     const start = (page - 1) * pageSize;
     const paginatedAlarms = filteredAlarms.slice(start, start + pageSize);
 
@@ -203,7 +190,6 @@ export const mockBackend = {
     });
   },
 
-  // Create new alarm
   createAlarm: async (alarmData) => {
     const newAlarm = {
       id: generateId(),
@@ -214,7 +200,6 @@ export const mockBackend = {
     return delay({ data: newAlarm });
   },
 
-  // Update existing alarm
   updateAlarm: async (id, alarmData) => {
     const index = alarms.findIndex(alarm => alarm.id === parseInt(id));
     if (index === -1) throw new Error('Alarm not found');
@@ -227,7 +212,6 @@ export const mockBackend = {
     return delay({ data: alarms[index] });
   },
 
-  // Delete alarm
   deleteAlarm: async (id) => {
     const index = alarms.findIndex(alarm => alarm.id === parseInt(id));
     if (index === -1) throw new Error('Alarm not found');
@@ -235,18 +219,11 @@ export const mockBackend = {
     return delay({ data: null });
   },
 
-  // Get call types
   getCallTypes: () => delay({ data: callTypes }),
-
-  // Get carriers
   getCarriers: () => delay({ data: carriers }),
-
-  // Get statuses
   getStatuses: () => delay({ data: statuses }),
 
-  // Get suggestions for a field
   getSuggestions: ({ field, query, limit = 5 }) => {
-    // Get unique values for the field that match the query
     const suggestions = [...new Set(
       alarms
         .map(alarm => alarm[field])
@@ -259,3 +236,101 @@ export const mockBackend = {
     return delay({ data: suggestions });
   }
 };
+
+// Set up fetch interceptor
+const originalFetch = typeof window !== 'undefined' ? window.fetch : null;
+
+if (typeof window !== 'undefined') {
+  window.fetch = async function(url, config = {}) {
+    try {
+      const fullUrl = new URL(url, window.location.origin);
+      const path = fullUrl.pathname;
+      const params = fullUrl.searchParams;
+      let result;
+
+      // Gateway endpoints
+      if (path.startsWith('/api/gateways/search')) {
+        result = await mockBackend.getGateways({
+          query: params.get('query') || '',
+          page: parseInt(params.get('page')) || 1,
+          pageSize: parseInt(params.get('pageSize')) || 10,
+          sortBy: params.get('sortBy') || 'name',
+          sortOrder: params.get('sortOrder') || 'asc'
+        });
+      }
+      else if (path === '/api/sites' && (!config.method || config.method === 'GET')) {
+        result = await mockBackend.getSites();
+      }
+      else if (path === '/api/meters' && (!config.method || config.method === 'GET')) {
+        result = await mockBackend.getMeters();
+      }
+      else if (path === '/api/meters/parameters' && (!config.method || config.method === 'GET')) {
+        result = await mockBackend.getMeterParameters();
+      }
+      else if (path === '/api/gateways/validate' && config.method === 'POST') {
+        const body = JSON.parse(config.body);
+        result = await mockBackend.validateGatewayParameters(body);
+      }
+      else if (path === '/api/gateways/configure' && config.method === 'POST') {
+        const body = JSON.parse(config.body);
+        result = await mockBackend.saveGatewayConfiguration(body);
+      }
+      
+      // Alarm endpoints
+      else if (path === '/api/alarms' && (!config.method || config.method === 'GET')) {
+        const filters = {};
+        params.forEach((value, key) => {
+          if (!['page', 'pageSize', 'sortBy', 'sortOrder'].includes(key)) {
+            filters[key] = value;
+          }
+        });
+        result = await mockBackend.getAlarms({
+          page: parseInt(params.get('page')) || 1,
+          pageSize: parseInt(params.get('pageSize')) || 10,
+          sortBy: params.get('sortBy') || 'id',
+          sortOrder: params.get('sortOrder') || 'asc',
+          ...filters
+        });
+      }
+      else if (path === '/api/alarms' && config.method === 'POST') {
+        const body = JSON.parse(config.body);
+        result = await mockBackend.createAlarm(body);
+      }
+      else if (path.match(/^\/api\/alarms\/\d+$/) && config.method === 'PUT') {
+        const id = parseInt(path.split('/').pop());
+        const body = JSON.parse(config.body);
+        result = await mockBackend.updateAlarm(id, body);
+      }
+      else if (path.match(/^\/api\/alarms\/\d+$/) && config.method === 'DELETE') {
+        const id = parseInt(path.split('/').pop());
+        result = await mockBackend.deleteAlarm(id);
+      }
+      else if (path === '/api/alarms/call-types' && (!config.method || config.method === 'GET')) {
+        result = await mockBackend.getCallTypes();
+      }
+      else if (path === '/api/alarms/carriers' && (!config.method || config.method === 'GET')) {
+        result = await mockBackend.getCarriers();
+      }
+      else if (path === '/api/alarms/statuses' && (!config.method || config.method === 'GET')) {
+        result = await mockBackend.getStatuses();
+      }
+      else if (path === '/api/alarms/suggestions' && (!config.method || config.method === 'GET')) {
+        result = await mockBackend.getSuggestions({
+          field: params.get('field'),
+          query: params.get('query')
+        });
+      }
+      else {
+        return originalFetch(url, config);
+      }
+
+      return new Response(JSON.stringify(result), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    } catch (error) {
+      console.warn('Mock API error, falling back to external API:', error);
+      return originalFetch(url, config);
+    }
+  };
+}
