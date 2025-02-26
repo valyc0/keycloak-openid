@@ -87,7 +87,7 @@ const mockApiHandler = async (config) => {
   }
 
   if (path === '/meters/parameters' && method?.toLowerCase() === 'get') {
-    return delayResponse({ data: METER_PARAMETERS });
+    return delayResponse({ data: {data: METER_PARAMETERS} });
   }
 
   if (path === '/gateways/validate' && method?.toLowerCase() === 'post') {

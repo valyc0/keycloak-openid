@@ -36,7 +36,7 @@ const GatewayWizard = () => {
       console.log('Initializing parameters for meter:', meterId);
       const response = await gatewayService.getMeterParameters(meterId);
       console.log('Response from getMeterParameters:', response);
-      
+
       // Initialize parameters with default values
       const initializedParams = response.data ? response.data.map(param => ({
         ...param,
@@ -45,7 +45,7 @@ const GatewayWizard = () => {
       })) : [];
 
       console.log('Initialized parameters:', initializedParams);
-      
+
       setMeterParams(prev => ({
         ...prev,
         [meterId]: initializedParams
@@ -87,12 +87,22 @@ const GatewayWizard = () => {
         return;
       }
 
+      // Reset meterParams state
+      const initialMeterParams = {};
+      selectedMeters.forEach(meter => {
+        initialMeterParams[meter.id] = meterParams[meter.id].map(param => ({
+          ...param,
+          error: undefined
+        }));
+      });
+      setMeterParams(initialMeterParams);
+
       // Server-side validation
       console.log('Validating parameters...', meterParams);
       const validationResponse = await gatewayService.validateGatewayParameters(meterParams);
       console.log('Validation response:', validationResponse);
 
-      if (!validationResponse.data.valid) {
+      if (!validationResponse.data?.valid) {
         const updatedParams = { ...meterParams };
         Object.entries(validationResponse.data.errors).forEach(([meterId, errors]) => {
           updatedParams[meterId] = meterParams[meterId].map((param) => ({
@@ -123,7 +133,7 @@ const GatewayWizard = () => {
       const response = await gatewayService.saveGatewayConfiguration(config);
       console.log('Save response:', response);
 
-      if (response.data.success) {
+      if (response.data && response.data.success) {
         setConfigJson(JSON.stringify(config, null, 2));
         setIsModalOpen(true);
       } else {
@@ -254,7 +264,7 @@ const GatewayWizard = () => {
                         className="close"
                         onClick={() => setIsModalOpen(false)}
                       >
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">&amp;times;</span>
                       </button>
                     </div>
                     <div className="modal-body">

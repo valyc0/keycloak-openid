@@ -15,7 +15,8 @@ const SelectMeters = ({
     const fetchMeters = async () => {
       try {
         const response = await gatewayService.getMeters();
-        setMeters(response.data);
+        console.log('getMeters response:', response);
+        setMeters(response);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching meters:', err);
@@ -31,7 +32,7 @@ const SelectMeters = ({
     const meter = meters.find((m) => m.id === meterId);
     if (meter && !selectedMeters.find((m) => m.id === meter.id)) {
       onMeterSelect(meter);
-      onMeterParametersInit(meter.id.toString());
+      onMeterParametersInit(meter.id);
     }
   };
 
@@ -57,10 +58,9 @@ const SelectMeters = ({
       </div>
     );
   }
-
-  const availableMeters = meters.filter(
-    (m) => !selectedMeters.find((sm) => sm.id === m.id)
-  );
+  const getAvailableMeters = () => {
+    return meters ? meters.filter((m) => !selectedMeters.find((sm) => sm.id === m.id)) : [];
+  };
 
   return (
     <div className="card">
@@ -81,7 +81,7 @@ const SelectMeters = ({
               value=""
             >
               <option value="">Add meter...</option>
-              {availableMeters.map((meter) => (
+              {getAvailableMeters().map((meter) => (
                 <option key={meter.id} value={meter.id}>
                   {meter.name} ({meter.type})
                 </option>
