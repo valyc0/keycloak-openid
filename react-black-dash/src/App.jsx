@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
 import Login from './pages/Login';
+import { setupFakeBackend } from './services/FakeBackendInterceptor';
+import api from './services/api';
 import Dashboard from './components/Dashboard/Dashboard';
 import Alarms from './pages/Alarms';
 import GatewayWizard from './pages/GatewayWizard';
@@ -13,6 +15,12 @@ import './App.css';
 
 function AppRoutes() {
   useEffect(() => {
+    // Initialize fake backend if enabled in environment
+    if (import.meta.env.VITE_USE_FAKE_BACKEND === 'true') {
+      console.log('Setting up fake backend interceptor');
+      setupFakeBackend(api);
+    }
+
     // Load Bootstrap JS
     const loadBootstrapScript = () => {
       const script = document.createElement('script');
