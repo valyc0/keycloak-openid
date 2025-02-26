@@ -82,14 +82,6 @@ const Header = ({ onToggleSidebar, sidebarCollapsed }) => {
           </svg>
           <span className="header-brand d-md-none text-white ms-2">My dash</span>
         </div>
-        <div className="flex-grow-1">
-          <input
-            type="text"
-            className="form-control search-input"
-            placeholder="Search..."
-            style={{ width: '200px' }}
-          />
-        </div>
       </div>
       <div className="d-flex align-items-center">
         <div className="dropdown">
