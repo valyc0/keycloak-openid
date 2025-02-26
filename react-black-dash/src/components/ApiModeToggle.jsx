@@ -10,6 +10,10 @@ import {
  */
 const ApiModeToggle = () => {
   const [isMockEnabled, setIsMockEnabled] = useState(isFakeBackendEnabled());
+  const showToggle = import.meta.env.VITE_SHOW_API_TOGGLE === 'true';
+
+  // Don't render anything if toggle is hidden
+  if (!showToggle) return null;
 
   // Toggle API mode when button is clicked
   const handleToggle = () => {

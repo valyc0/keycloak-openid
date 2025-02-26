@@ -221,29 +221,34 @@ const mockApiHandler = async (config) => {
   }
 
   if (path === '/alarms' && method?.toLowerCase() === 'post') {
+    // Find the highest ID and increment
+    const maxId = Math.max(...mockAlarms.map(a => Number(a.id)));
     const newAlarm = {
       ...data,
-      id: mockAlarms.length + 1,
+      id: maxId + 1, // ID as number
+      gatewayId: Number(data.gatewayId),
       timestamp: new Date().toISOString()
     };
     mockAlarms.push(newAlarm);
     return delayResponse({ data: newAlarm });
   }
 
-  if (path.match(/^\/alarms\/\d+$/) && method?.toLowerCase() === 'put') {
-    const id = parseInt(path.split('/').pop());
-    const index = mockAlarms.findIndex(a => a.id === id);
+  if (path.match(/^\/alarms\/[^/]+$/) && method?.toLowerCase() === 'put') {
+    const pathId = Number(path.split('/').pop());
+    // Find alarm by numeric ID
+    const index = mockAlarms.findIndex(a => a.id === pathId);
     if (index !== -1) {
-      const updatedAlarm = { ...mockAlarms[index], ...data, id };
+      const updatedAlarm = { ...mockAlarms[index], ...data, id: pathId };
       mockAlarms[index] = updatedAlarm;
       return delayResponse({ data: updatedAlarm });
     }
     throw new Error('Alarm not found');
   }
 
-  if (path.match(/^\/alarms\/\d+$/) && method?.toLowerCase() === 'delete') {
-    const id = parseInt(path.split('/').pop());
-    const index = mockAlarms.findIndex(a => a.id === id);
+  if (path.match(/^\/alarms\/[^/]+$/) && method?.toLowerCase() === 'delete') {
+    const pathId = Number(path.split('/').pop());
+    // Find alarm by numeric ID
+    const index = mockAlarms.findIndex(a => a.id === pathId);
     if (index !== -1) {
       mockAlarms.splice(index, 1);
       return delayResponse({ data: { success: true } });

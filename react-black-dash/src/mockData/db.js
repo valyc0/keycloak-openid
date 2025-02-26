@@ -111,8 +111,8 @@ export const mockAlarms = Array.from({ length: 100 }, (_, i) => {
   const gateway = mockGateways[gatewayIndex];
   
   return {
-    id: String(i + 1),
-    gatewayId: gateway.id,
+    id: i + 1,  // id as number
+    gatewayId: Number(gateway.id),
     gatewayName: gateway.name,
     type: alarmTypes[Math.floor(Math.random() * alarmTypes.length)],
     severity: alarmSeverities[Math.floor(Math.random() * alarmSeverities.length)],
