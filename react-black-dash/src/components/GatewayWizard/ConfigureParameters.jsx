@@ -58,7 +58,7 @@ const ConfigureParameters = ({
                       {meterParams[meter.id]?.map((param) => (
                         <div className="col-md-6" key={param.id}>
                           <div className="form-group">
-                            <label>
+                            <label className="white-label">
                               {param.name}
                               {param.required && (
                                 <span className="text-danger">*</span>

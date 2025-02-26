@@ -64,6 +64,31 @@ h6 {
   color: white !important;
 }
 
+label {
+  color: white !important;
+}
+
+.white-label {
+  color: white !important;
+}
+
+.card-title {
+  color: white !important;
+}
+
+.text-primary {
+  color: white !important;
+}
+
+.text-muted {
+  color: #34C759 !important; /* green color */
+}
+
+/* Label styling */
+label {
+  color: white !important;
+}
+
 /* Modal styles */
 .modal-content {
   background-color: var(--panel-background) !important;
