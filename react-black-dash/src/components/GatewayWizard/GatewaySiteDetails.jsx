@@ -74,6 +74,7 @@ const GatewaySiteDetails = ({
                   value={gatewayName}
                   onChange={(e) => onGatewayNameChange(e.target.value)}
                   placeholder="Enter gateway name"
+                  disabled
                 />
               </div>
             </div>

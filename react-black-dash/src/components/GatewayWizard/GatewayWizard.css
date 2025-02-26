@@ -6,6 +6,18 @@
   background-color: var(--lighter-background) !important;
 }
 
+.summary-section {
+  background-color: white !important;
+}
+
+.summary-section * {
+  color: white !important;
+}
+
+.summary-section .badge {
+  border: 1px solid white !important;
+}
+
 .form-control {
   background-color: var(--panel-background) !important;
   border: none !important;
@@ -44,4 +56,10 @@
 
 .bg-light {
   background-color: var(--panel-background) !important;
+}
+
+.card-header .card-title,
+.card-title strong,
+h6 {
+  color: white !important;
 }
