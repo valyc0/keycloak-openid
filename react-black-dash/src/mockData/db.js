@@ -72,7 +72,7 @@ export const alarmOptions = {
 export const mockGateways = Array.from({ length: 20 }, (_, i) => {
   const siteIndex = Math.floor(Math.random() * mockSites.length);
   return {
-    id: String(i + 1),
+    id: i + 1,
     name: `Gateway ${i + 1}`,
     serial: `GW${String(i + 1).padStart(5, '0')}`,
     model: `Model-${Math.floor(Math.random() * 3) + 1}`,
