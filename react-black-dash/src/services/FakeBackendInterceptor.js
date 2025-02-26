@@ -48,7 +48,6 @@ const mockApiHandler = async (config) => {
     const params = config.params || {};
     let filteredGateways = [...mockGateways];
     
-    // Apply search filter if query is provided
     if (params.query && params.query.length >= 3) {
       filteredGateways = filteredGateways.filter(gateway =>
         gateway.name.toLowerCase().includes(params.query.toLowerCase()) ||
@@ -56,7 +55,6 @@ const mockApiHandler = async (config) => {
       );
     }
 
-    // Sorting
     if (params.sortBy) {
       const sortOrder = params.sortOrder === 'desc' ? -1 : 1;
       filteredGateways.sort((a, b) => {
@@ -67,7 +65,6 @@ const mockApiHandler = async (config) => {
       });
     }
 
-    // Pagination
     const start = (Number(params.page) - 1) * Number(params.pageSize);
     const end = start + Number(params.pageSize);
     const paginatedGateways = filteredGateways.slice(start, end);
@@ -123,7 +120,7 @@ const mockApiHandler = async (config) => {
     if (path === '/alarms/call-types') {
       return delayResponse({ data: alarmOptions.callTypes });
     }
-    if (path === '/alarms/carriers') {
+    if (path === '/alarms/carriers1111') {
       return delayResponse({ data: alarmOptions.carriers });
     }
     if (path === '/alarms/statuses') {
@@ -146,7 +143,6 @@ const mockApiHandler = async (config) => {
       return delayResponse({ data: suggestions });
     }
     
-    // Handle alarms listing
     if (path === '/alarms') {
       const params = config.params || {};
       const page = Number(params.page) || 1;
@@ -195,7 +191,6 @@ const mockApiHandler = async (config) => {
     }
   }
 
-  // Handle alarm creation
   if (path === '/alarms' && method?.toLowerCase() === 'post') {
     const newAlarm = {
       ...data,
@@ -206,7 +201,6 @@ const mockApiHandler = async (config) => {
     return delayResponse({ data: newAlarm });
   }
 
-  // Handle alarm update
   if (path.match(/^\/alarms\/\d+$/) && method?.toLowerCase() === 'put') {
     const id = parseInt(path.split('/').pop());
     const index = mockAlarms.findIndex(a => a.id === id);
@@ -218,7 +212,6 @@ const mockApiHandler = async (config) => {
     throw new Error('Alarm not found');
   }
 
-  // Handle alarm deletion
   if (path.match(/^\/alarms\/\d+$/) && method?.toLowerCase() === 'delete') {
     const id = parseInt(path.split('/').pop());
     const index = mockAlarms.findIndex(a => a.id === id);
@@ -229,8 +222,8 @@ const mockApiHandler = async (config) => {
     throw new Error('Alarm not found');
   }
 
-  // If no mock handler matched, throw error
-  throw new Error(`Unhandled request: ${method} ${url}`);
+  // If no mock handler matched, indicate this request should go to real API
+  throw new Error('MOCK_HANDLER_NOT_FOUND');
 };
 
 // Setup interceptors
@@ -242,22 +235,33 @@ export const setupFakeBackend = (api) => {
       // Convert the response to a rejected promise to prevent actual HTTP request
       return Promise.reject({
         config,
-        response: response
+        response
       });
     } catch (error) {
+      if (error.message === 'MOCK_HANDLER_NOT_FOUND') {
+        // If no mock handler was found, let the request continue to real API
+        console.log(`[Mock API] No handler found for ${config.method?.toUpperCase()} ${config.url} - forwarding to real API`);
+        return config;
+      }
       return Promise.reject(error);
     }
   });
 
   // Add response interceptor
   api.interceptors.response.use(
-    undefined,
+    // Handle successful responses (from real API)
+    response => {
+      console.log('[Mock API] Real API response:', response);
+      return response;
+    },
+    // Handle errors
     async (error) => {
-      // If we have a response in the error, it means it's our mock response
+      // If we have a mock response in the error, it means it's our mock data
       if (error.response) {
         return error.response;
       }
-      // Otherwise, it's a real error
+      // Otherwise, it's a real error from the API
+      console.error('[Mock API] Real API error:', error);
       return Promise.reject(error);
     }
   );
