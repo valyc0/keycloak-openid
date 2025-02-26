@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect } from 'rea
 import { AuthProvider as OidcProvider, useAuth as useOidcAuth } from "react-oidc-context";
 import { oidcConfig } from "../lib/auth-config";
 import PropTypes from 'prop-types';
+import { authTokenManager } from "../services/authTokenManager";
 
 const AuthContext = createContext(null);
 
@@ -84,6 +85,16 @@ export const AuthProvider = ({ children }) => {
 
 const FakeAuthProvider = ({ children }) => {
   const auth = useFakeAuth();
+  
+  // Set the token in the token manager when it changes
+  useEffect(() => {
+    if (auth.token) {
+      authTokenManager.setToken(auth.token);
+    } else {
+      authTokenManager.clearToken();
+    }
+  }, [auth.token]);
+  
   return (
     <AuthContext.Provider value={auth}>
       {children}
@@ -98,11 +109,24 @@ const AuthContextProvider = ({ children }) => {
     isAuthenticated: auth.isAuthenticated,
     user: auth.user,
     login: auth.signinRedirect,
-    logout: auth.signoutRedirect,
+    logout: () => {
+      // Clear token from token manager before redirecting
+      authTokenManager.clearToken();
+      auth.signoutRedirect();
+    },
     error: auth.error,
     isLoading: auth.isLoading,
     token: auth.user?.access_token
   };
+  
+  // Update the token manager when the token changes
+  useEffect(() => {
+    if (contextValue.token) {
+      authTokenManager.setToken(contextValue.token);
+    } else if (!auth.isLoading && !auth.isAuthenticated) {
+      authTokenManager.clearToken();
+    }
+  }, [contextValue.token, auth.isAuthenticated, auth.isLoading]);
 
   return (
     <AuthContext.Provider value={contextValue}>

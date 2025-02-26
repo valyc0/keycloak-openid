@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { authTokenManager } from './authTokenManager';
 
 /**
  * API Configuration and Service Module
@@ -25,6 +26,25 @@ const api = axios.create({
     'Content-Type': 'application/json'
   }
 });
+
+// Request interceptor to add authentication token
+api.interceptors.request.use(
+  config => {
+    // Get token from centralized token manager
+    const token = authTokenManager.getToken();
+
+    // If token exists, add it to the Authorization header
+    if (token) {
+      config.headers = {
+        ...config.headers,
+        'Authorization': `Bearer ${token}`
+      };
+    }
+    
+    return config;
+  },
+  error => Promise.reject(error)
+);
 
 // Error interceptor for common API errors
 api.interceptors.response.use(
