@@ -28,7 +28,7 @@ const SelectMeters = ({
   }, []);
 
   const handleMeterAdd = (meterId) => {
-    const meter = meters.find((m) => m.id === parseInt(meterId));
+    const meter = meters.find((m) => m.id === meterId);
     if (meter && !selectedMeters.find((m) => m.id === meter.id)) {
       onMeterSelect(meter);
       onMeterParametersInit(meter.id.toString());

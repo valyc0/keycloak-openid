@@ -146,6 +146,12 @@ export const gatewayService = {
     const response = await api.get('/meters/parameters');
     return response.data;
   },
+  async getMeterParameters(meterId) {
+    const response = await api.get('/meters/parameters', {
+      params: { meterId }
+    });
+    return response.data;
+  },
 
   async validateGatewayParameters(params) {
     const response = await api.post('/gateways/validate', params);

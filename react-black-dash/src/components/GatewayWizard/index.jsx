@@ -34,14 +34,15 @@ const GatewayWizard = () => {
   const handleMeterParametersInit = async (meterId) => {
     try {
       console.log('Initializing parameters for meter:', meterId);
-      const response = await gatewayService.getMeterParameters();
+      const response = await gatewayService.getMeterParameters(meterId);
+      console.log('Response from getMeterParameters:', response);
       
       // Initialize parameters with default values
-      const initializedParams = response.data.map(param => ({
+      const initializedParams = response.data ? response.data.map(param => ({
         ...param,
         error: undefined,
-        value: param.value || ''  // Use default value from mock data or empty string
-      }));
+        value: param.defaultValue || ''  // Use default value from mock data or empty string
+      })) : [];
 
       console.log('Initialized parameters:', initializedParams);
       
@@ -270,11 +271,11 @@ const GatewayWizard = () => {
                         Close
                       </button>
                     </div>
-                  </div>
                 </div>
               </div>
-              <div className="modal-backdrop show" style={{ zIndex: 1040 }}></div>
-            </>
+            </div>
+            <div className="modal-backdrop show" style={{ zIndex: 1040 }}></div>
+          </>
       )}
     </div>
   );
