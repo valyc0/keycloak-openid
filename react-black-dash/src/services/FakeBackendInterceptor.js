@@ -96,27 +96,29 @@ const mockApiHandler = async (config) => {
     let hasErrors = false;
     
     Object.entries(data).forEach(([meterId, parameters]) => {
+      // Handle meterId as number for validation errors
+      const meterIdNum = Number(meterId);
       parameters.forEach(param => {
         if (param.required && (!param.value || param.value.trim() === '')) {
-          if (!errors[meterId]) errors[meterId] = {};
-          errors[meterId][param.id] = 'This field is required';
+          if (!errors[meterIdNum]) errors[meterIdNum] = {};
+          errors[meterIdNum][param.id] = 'This field is required';
           hasErrors = true;
         }
         if (param.type === 'number' && param.value) {
           if (isNaN(param.value)) {
-            if (!errors[meterId]) errors[meterId] = {};
-            errors[meterId][param.id] = 'Must be a number';
+            if (!errors[meterIdNum]) errors[meterIdNum] = {};
+            errors[meterIdNum][param.id] = 'Must be a number';
             hasErrors = true;
           } else {
             const numValue = Number(param.value);
             if (param.min !== undefined && numValue < param.min) {
-              if (!errors[meterId]) errors[meterId] = {};
-              errors[meterId][param.id] = `Must be at least ${param.min}`;
+              if (!errors[meterIdNum]) errors[meterIdNum] = {};
+              errors[meterIdNum][param.id] = `Must be at least ${param.min}`;
               hasErrors = true;
             }
             if (param.max !== undefined && numValue > param.max) {
-              if (!errors[meterId]) errors[meterId] = {};
-              errors[meterId][param.id] = `Must be at most ${param.max}`;
+              if (!errors[meterIdNum]) errors[meterIdNum] = {};
+              errors[meterIdNum][param.id] = `Must be at most ${param.max}`;
               hasErrors = true;
             }
           }

@@ -98,7 +98,7 @@ const GatewaySiteDetails = ({
                       onSiteSelect(null);
                       return;
                     }
-                    const site = sites.find((s) => s.id === siteId);
+                    const site = sites.find((s) => s.id === Number(siteId));
                     if (site) {
                       onSiteSelect(site);
                     }

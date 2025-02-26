@@ -4,7 +4,7 @@ export const gatewayStatuses = ['Online', 'Offline', 'Maintenance'];
 
 // Mock sites data
 export const mockSites = Array.from({ length: 10 }, (_, i) => ({
-  id: String(i + 1),
+  id: i + 1,  // Keep ID as number for consistency
   name: `Site ${i + 1}`,
   address: `${i + 100} Main Street`,
   city: `City ${i + 1}`,
@@ -19,7 +19,7 @@ export const mockSites = Array.from({ length: 10 }, (_, i) => ({
 export const meterTypes = ['Electric', 'Water', 'Gas', 'Temperature'];
 
 export const mockMeters = Array.from({ length: 50 }, (_, i) => ({
-  id: String(i + 1),
+  id: i + 1,  // Keep ID as number for consistency
   name: `Meter ${i + 1}`,
   type: meterTypes[Math.floor(Math.random() * meterTypes.length)],
   protocol: ['MODBUS', 'MQTT', 'HTTP'][Math.floor(Math.random() * 3)],
@@ -79,7 +79,7 @@ export const mockGateways = Array.from({ length: 20 }, (_, i) => {
     firmware: `v${Math.floor(Math.random() * 5) + 1}.${Math.floor(Math.random() * 10)}`,
     ip: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
     status: gatewayStatuses[Math.floor(Math.random() * gatewayStatuses.length)],
-    siteId: String(mockSites[siteIndex].id),
+    siteId: mockSites[siteIndex].id,  // Keep as number since site IDs are numbers
     siteName: mockSites[siteIndex].name,
     lastConnection: new Date().toISOString(),
     isConfigured: Math.random() > 0.2,
