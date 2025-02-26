@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { authTokenManager } from './authTokenManager';
+import { setupFakeBackend } from './FakeBackendInterceptor';
 
 /**
  * API Configuration and Service Module
@@ -27,6 +28,52 @@ const api = axios.create({
   }
 });
 
+// API mode management
+let useFakeBackend = import.meta.env.VITE_USE_FAKE_BACKEND === 'true';
+let fakeBackendInitialized = false;
+
+/**
+ * Initialize the fake backend if enabled by environment or explicitly called
+ * @returns {boolean} Whether fake backend is active
+ */
+export const initFakeBackend = () => {
+  if (useFakeBackend && !fakeBackendInitialized) {
+    console.log('[API] Initializing fake backend');
+    setupFakeBackend(api);
+    fakeBackendInitialized = true;
+  }
+  return useFakeBackend;
+};
+
+/**
+ * Enable fake backend responses
+ */
+export const enableFakeBackend = () => {
+  if (!fakeBackendInitialized) {
+    setupFakeBackend(api);
+    fakeBackendInitialized = true;
+  }
+  useFakeBackend = true;
+  console.log('[API] Fake backend enabled');
+};
+
+/**
+ * Disable fake backend responses (uses real API)
+ * Note: Once initialized, interceptors remain active but will pass through to real API
+ */
+export const disableFakeBackend = () => {
+  useFakeBackend = false;
+  console.log('[API] Using real backend');
+};
+
+/**
+ * Check if fake backend is currently enabled
+ * @returns {boolean} Whether fake backend is active
+ */
+export const isFakeBackendEnabled = () => {
+  return useFakeBackend;
+};
+
 // Request interceptor to add authentication token
 api.interceptors.request.use(
   config => {
@@ -52,11 +99,11 @@ api.interceptors.response.use(
   error => {
     if (error.response) {
       // Server responded with non-2xx status
-      console.error('[API Error]', {
+      console.error('[API Error]', JSON.stringify({
         status: error.response.status,
         data: error.response.data,
         endpoint: error.config.url
-      });
+      }, null, 2));
     } else if (error.request) {
       // Request made but no response received
       console.error('[API Error] No response received:', error.request);

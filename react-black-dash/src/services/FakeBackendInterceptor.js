@@ -145,13 +145,15 @@ const mockApiHandler = async (config) => {
   // Handle alarm endpoints
   if (method?.toLowerCase() === 'get') {
     if (path === '/alarms/call-types') {
-      return delayResponse({ data: alarmOptions.callTypes });
+      return delayResponse(alarmOptions.callTypes);
     }
     if (path === '/alarms/carriers') {
-      return delayResponse({ data: alarmOptions.carriers });
+      // Return array of carrier names
+      return delayResponse(alarmOptions.carriers);
     }
     if (path === '/alarms/statuses') {
-      return delayResponse({ data: alarmOptions.statuses });
+      // Map statuses with consistent IDs that match their usage in mockAlarms
+      return delayResponse(alarmOptions.statuses);
     }
     if (path === '/alarms/suggestions') {
       const field = config.params?.field;
@@ -257,6 +259,15 @@ const mockApiHandler = async (config) => {
 export const setupFakeBackend = (api) => {
   // Add request interceptor
   api.interceptors.request.use(async (config) => {
+    // Import dynamically to avoid circular dependencies
+    const { isFakeBackendEnabled } = await import('./api');
+    
+    // Only use mock handlers if fake backend is enabled
+    if (!isFakeBackendEnabled()) {
+      console.log(`[Mock API] Disabled - using real API for ${config.method?.toUpperCase()} ${config.url}`);
+      return config;
+    }
+    
     try {
       const response = await mockApiHandler(config);
       // Convert the response to a rejected promise to prevent actual HTTP request
@@ -267,13 +278,10 @@ export const setupFakeBackend = (api) => {
     } catch (error) {
       if (error.message === 'MOCK_HANDLER_NOT_FOUND') {
         // If no mock handler was found, forward to real external API
-        const externalUrl = import.meta.env.VITE_EXTERNAL_API_URL;
         console.log(`[Mock API] No handler found for ${config.method?.toUpperCase()} ${config.url}`);
-        console.log(`[Mock API] Forwarding to external API: ${externalUrl}`);
-// Create new config for external API
-// Keep the original baseURL from api.js to maintain consistency
-return config;
-        return externalConfig;
+        console.log(`[Mock API] Forwarding to real API...`);
+        // Keep the original config to maintain consistency
+        return config;
       }
       return Promise.reject(error);
     }

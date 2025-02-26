@@ -33,7 +33,7 @@ const Alarms = () => {
     { key: 'caller_number', label: 'Caller Number', type: 'text' },
     { key: 'callee_number', label: 'Callee Number', type: 'text' },
     {
-      key: 'call_type',
+      key: 'callType',
       label: 'Call Type',
       type: 'select',
       options: createOptions(callTypeOptions)
@@ -55,7 +55,7 @@ const Alarms = () => {
   const initialAlarmState = {
     caller_number: '',
     callee_number: '',
-    call_type: '',
+    callType: '',
     carrier: '',
     duration_seconds: '',
     charge_amount: '',
@@ -142,9 +142,9 @@ const Alarms = () => {
         alarmService.getCarriers()
       ]);
       console.log('Raw responses:', { statusRes, callTypeRes, carrierRes });
-      const statuses = statusRes?.data || [];
-      const callTypes = callTypeRes?.data || [];
-      const carriers = carrierRes?.data || [];
+      const statuses = statusRes || [];
+      const callTypes = callTypeRes || [];
+      const carriers = carrierRes || [];
       
       console.log('Setting options:', { statuses, callTypes, carriers });
       
@@ -215,7 +215,7 @@ const Alarms = () => {
     { key: 'id', label: 'ID' },
     { key: 'caller_number', label: 'Caller Number' },
     { key: 'callee_number', label: 'Callee Number' },
-    { key: 'call_type', label: 'Call Type' },
+    { key: 'callType', label: 'Call Type' },
     { key: 'carrier', label: 'Carrier' },
     { key: 'duration_seconds', label: 'Duration (s)' },
     { key: 'charge_amount', label: 'Charge ($)' },
@@ -227,7 +227,7 @@ const Alarms = () => {
     { name: 'caller_number', label: 'Caller Number', type: 'text', required: true },
     { name: 'callee_number', label: 'Callee Number', type: 'text', required: true },
     {
-      name: 'call_type',
+      name: 'callType',
       label: 'Call Type',
       type: 'select',
       options: createOptions(callTypeOptions),

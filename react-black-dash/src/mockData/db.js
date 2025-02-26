@@ -4,22 +4,26 @@ export const gatewayStatuses = ['Online', 'Offline', 'Maintenance'];
 
 // Mock sites data
 export const mockSites = Array.from({ length: 10 }, (_, i) => ({
-  id: i + 1,
+  id: String(i + 1),
   name: `Site ${i + 1}`,
   address: `${i + 100} Main Street`,
   city: `City ${i + 1}`,
-  country: 'USA'
+  state: ['CA', 'NY', 'TX', 'FL', 'IL'][i % 5],
+  zipCode: `${Math.floor(Math.random() * 90000) + 10000}`,
+  country: 'USA',
+  latitude: (Math.random() * 180 - 90).toFixed(6),
+  longitude: (Math.random() * 360 - 180).toFixed(6)
 }));
 
 // Mock meters data
 export const meterTypes = ['Electric', 'Water', 'Gas', 'Temperature'];
 
 export const mockMeters = Array.from({ length: 50 }, (_, i) => ({
-  id: i + 1,
+  id: String(i + 1),
   name: `Meter ${i + 1}`,
   type: meterTypes[Math.floor(Math.random() * meterTypes.length)],
-  model: `Model-${Math.floor(Math.random() * 5) + 1}`,
-  serialNumber: `MTR${String(i + 1).padStart(5, '0')}`
+  protocol: ['MODBUS', 'MQTT', 'HTTP'][Math.floor(Math.random() * 3)],
+  manufacturer: ['Schneider', 'ABB', 'Siemens', 'GE'][Math.floor(Math.random() * 4)]
 }));
 
 export const METER_PARAMETERS = [
@@ -57,21 +61,32 @@ export const METER_PARAMETERS = [
   }
 ];
 
-// Mock gateways data
-export const mockGateways = Array.from({ length: 20 }, (_, i) => ({
-  id: i + 1,
-  name: `Gateway ${i + 1}`,
-  serial: `GW${String(i + 1).padStart(5, '0')}`,
-  type: gatewayTypes[Math.floor(Math.random() * gatewayTypes.length)],
-  status: gatewayStatuses[Math.floor(Math.random() * gatewayStatuses.length)]
-}));
-
 // Alarm related mock data
 export const alarmOptions = {
   callTypes: ['Incoming', 'Outgoing', 'Missed'],
   carriers: ['Verizon', 'AT&T', 'T-Mobile', 'Sprint'],
   statuses: ['Completed', 'Failed', 'In Progress']
 };
+
+// Mock gateways data
+export const mockGateways = Array.from({ length: 20 }, (_, i) => {
+  const siteIndex = Math.floor(Math.random() * mockSites.length);
+  return {
+    id: String(i + 1),
+    name: `Gateway ${i + 1}`,
+    serial: `GW${String(i + 1).padStart(5, '0')}`,
+    model: `Model-${Math.floor(Math.random() * 3) + 1}`,
+    firmware: `v${Math.floor(Math.random() * 5) + 1}.${Math.floor(Math.random() * 10)}`,
+    ip: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+    status: gatewayStatuses[Math.floor(Math.random() * gatewayStatuses.length)],
+    siteId: String(mockSites[siteIndex].id),
+    siteName: mockSites[siteIndex].name,
+    lastConnection: new Date().toISOString(),
+    isConfigured: Math.random() > 0.2,
+    callType: alarmOptions.callTypes[Math.floor(Math.random() * alarmOptions.callTypes.length)],
+    carrier: alarmOptions.carriers[Math.floor(Math.random() * alarmOptions.carriers.length)]
+  };
+});
 
 // Helper function to generate random data
 const generateRandomPhone = () => {
@@ -86,20 +101,33 @@ const generateRandomTimestamp = () => {
 };
 
 // Mock alarms data
+export const alarmTypes = ['System', 'Security', 'Performance', 'Connection'];
+export const alarmSeverities = ['Critical', 'Major', 'Minor', 'Warning', 'Info'];
+
 export const mockAlarms = Array.from({ length: 100 }, (_, i) => {
   const callType = alarmOptions.callTypes[Math.floor(Math.random() * alarmOptions.callTypes.length)];
   const isMissed = callType === 'Missed';
+  const gatewayIndex = Math.floor(Math.random() * mockGateways.length);
+  const gateway = mockGateways[gatewayIndex];
   
   return {
-    id: i + 1,
+    id: String(i + 1),
+    gatewayId: gateway.id,
+    gatewayName: gateway.name,
+    type: alarmTypes[Math.floor(Math.random() * alarmTypes.length)],
+    severity: alarmSeverities[Math.floor(Math.random() * alarmSeverities.length)],
+    message: `Alarm message for ${gateway.name} - ${isMissed ? 'Missed call' : 'Call ' + callType}`,
+    timestamp: generateRandomTimestamp(),
+    status: isMissed ? 'Failed' : alarmOptions.statuses[Math.floor(Math.random() * alarmOptions.statuses.length)],
+    callType: callType,
+    carrier: alarmOptions.carriers[Math.floor(Math.random() * alarmOptions.carriers.length)],
+    siteId: gateway.siteId,
+    siteName: gateway.siteName,
+    caller: `Caller ${i + 1}`,
     caller_number: generateRandomPhone(),
     callee_number: generateRandomPhone(),
-    call_type: callType,
-    carrier: alarmOptions.carriers[Math.floor(Math.random() * alarmOptions.carriers.length)],
     duration_seconds: isMissed ? 0 : Math.floor(Math.random() * 3600), // Max 1 hour
-    charge_amount: isMissed ? 0 : Number((Math.random() * 10).toFixed(2)), // Max $10
-    status: isMissed ? 'Failed' : alarmOptions.statuses[Math.floor(Math.random() * alarmOptions.statuses.length)],
-    timestamp: generateRandomTimestamp()
+    charge_amount: isMissed ? 0 : Number((Math.random() * 10).toFixed(2)) // Max $10
   };
 });
 

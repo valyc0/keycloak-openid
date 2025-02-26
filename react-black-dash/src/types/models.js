@@ -1,24 +1,40 @@
 export class Alarm {
   constructor({
     id = null,
+    gatewayId = '',
+    gatewayName = '',
+    type = '',
+    severity = '',
+    message = '',
+    timestamp = null,
+    status = '',
+    callType = '',
+    carrier = '',
+    siteId = '',
+    siteName = '',
+    caller = '',
     caller_number = '',
     callee_number = '',
-    call_type = '',
-    carrier = '',
     duration_seconds = 0,
-    charge_amount = 0.0,
-    status = '',
-    timestamp = null
+    charge_amount = 0.0
   } = {}) {
     this.id = id;
+    this.gatewayId = gatewayId;
+    this.gatewayName = gatewayName;
+    this.type = type;
+    this.severity = severity;
+    this.message = message;
+    this.timestamp = timestamp;
+    this.status = status;
+    this.callType = callType;
+    this.carrier = carrier;
+    this.siteId = siteId;
+    this.siteName = siteName;
+    this.caller = caller;
     this.caller_number = caller_number;
     this.callee_number = callee_number;
-    this.call_type = call_type;
-    this.carrier = carrier;
     this.duration_seconds = duration_seconds;
     this.charge_amount = charge_amount;
-    this.status = status;
-    this.timestamp = timestamp;
   }
 
   static fromJson(json) {
@@ -28,14 +44,22 @@ export class Alarm {
   toJson() {
     return {
       id: this.id,
+      gatewayId: this.gatewayId,
+      gatewayName: this.gatewayName,
+      type: this.type,
+      severity: this.severity,
+      message: this.message,
+      timestamp: this.timestamp,
+      status: this.status,
+      callType: this.callType,
+      carrier: this.carrier,
+      siteId: this.siteId,
+      siteName: this.siteName,
+      caller: this.caller,
       caller_number: this.caller_number,
       callee_number: this.callee_number,
-      call_type: this.call_type,
-      carrier: this.carrier,
       duration_seconds: this.duration_seconds,
-      charge_amount: this.charge_amount,
-      status: this.status,
-      timestamp: this.timestamp
+      charge_amount: this.charge_amount
     };
   }
 }
@@ -45,14 +69,30 @@ export class Gateway {
     id = null,
     name = '',
     serial = '',
-    type = '',
-    status = ''
+    model = '',
+    firmware = '',
+    ip = '',
+    status = '',
+    siteId = '',
+    siteName = '',
+    lastConnection = null,
+    isConfigured = false,
+    callType = '',
+    carrier = ''
   } = {}) {
     this.id = id;
     this.name = name;
     this.serial = serial;
-    this.type = type;
+    this.model = model;
+    this.firmware = firmware;
+    this.ip = ip;
     this.status = status;
+    this.siteId = siteId;
+    this.siteName = siteName;
+    this.lastConnection = lastConnection;
+    this.isConfigured = isConfigured;
+    this.callType = callType;
+    this.carrier = carrier;
   }
 
   static fromJson(json) {
@@ -64,8 +104,16 @@ export class Gateway {
       id: this.id,
       name: this.name,
       serial: this.serial,
-      type: this.type,
-      status: this.status
+      model: this.model,
+      firmware: this.firmware,
+      ip: this.ip,
+      status: this.status,
+      siteId: this.siteId,
+      siteName: this.siteName,
+      lastConnection: this.lastConnection,
+      isConfigured: this.isConfigured,
+      callType: this.callType,
+      carrier: this.carrier
     };
   }
 }
@@ -76,13 +124,21 @@ export class Site {
     name = '',
     address = '',
     city = '',
-    country = ''
+    state = '',
+    zipCode = '',
+    country = '',
+    latitude = null,
+    longitude = null
   } = {}) {
     this.id = id;
     this.name = name;
     this.address = address;
     this.city = city;
+    this.state = state;
+    this.zipCode = zipCode;
     this.country = country;
+    this.latitude = latitude;
+    this.longitude = longitude;
   }
 
   static fromJson(json) {
@@ -95,7 +151,11 @@ export class Site {
       name: this.name,
       address: this.address,
       city: this.city,
-      country: this.country
+      state: this.state,
+      zipCode: this.zipCode,
+      country: this.country,
+      latitude: this.latitude,
+      longitude: this.longitude
     };
   }
 }
@@ -105,14 +165,14 @@ export class Meter {
     id = null,
     name = '',
     type = '',
-    model = '',
-    serialNumber = ''
+    protocol = '',
+    manufacturer = ''
   } = {}) {
     this.id = id;
     this.name = name;
     this.type = type;
-    this.model = model;
-    this.serialNumber = serialNumber;
+    this.protocol = protocol;
+    this.manufacturer = manufacturer;
   }
 
   static fromJson(json) {
@@ -124,8 +184,8 @@ export class Meter {
       id: this.id,
       name: this.name,
       type: this.type,
-      model: this.model,
-      serialNumber: this.serialNumber
+      protocol: this.protocol,
+      manufacturer: this.manufacturer
     };
   }
 }
