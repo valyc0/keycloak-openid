@@ -18,12 +18,14 @@ const GenericFilters = ({
       {filterFields.map(field => (
         <div key={field.key} className="col-md-3">
           <div className="position-relative">
-            <label className="form-label">{field.label}</label>
+            <label className={`form-label ${(filters[field.key] || searchInputs[field.key]) ? styles.activeFilterLabel : ''}`}>
+              {field.label}
+            </label>
             {field.type === 'text' ? (
               <>
                 <input
                   type="text"
-                  className={`form-control ${styles.filterInput}`}
+                  className={`form-control ${styles.filterInput} ${searchInputs[field.key] ? styles.activeFilter : ''}`}
                   placeholder={`Filter by ${field.label.toLowerCase()}`}
                   value={searchInputs[field.key] || ''}
                   onChange={(e) => onSearchInputChange(field.key, e.target.value)}
@@ -46,7 +48,7 @@ const GenericFilters = ({
               </>
             ) : field.type === 'select' && field.options ? (
               <select
-                className={`form-control ${styles.filterInput}`}
+                className={`form-control ${styles.filterInput} ${filters[field.key] ? styles.activeFilter : ''}`}
                 value={filters[field.key] || ''}
                 onChange={(e) => onFilterChange(field.key, e.target.value)}
               >

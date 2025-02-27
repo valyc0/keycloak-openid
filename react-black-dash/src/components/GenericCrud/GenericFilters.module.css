@@ -2,6 +2,17 @@
   background-color: #2d2d3f !important;
   border-color: #375a7f !important;
   color: #ffffff !important;
+  transition: all 0.3s ease !important;
+}
+
+.activeFilter {
+  border-color: #e74c3c !important;
+  color: #e74c3c !important;
+}
+
+.activeFilterLabel {
+  color: #e74c3c !important;
+  font-weight: bold !important;
 }
 
 .filterInput::placeholder {
