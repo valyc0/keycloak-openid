@@ -16,9 +16,12 @@ import jakarta.persistence.GenerationType;
 @Entity
 public class Meter {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String name;
     private String type;
     private String protocol;
     private String manufacturer;
+    private String model;
+    private String serialNumber;
 }

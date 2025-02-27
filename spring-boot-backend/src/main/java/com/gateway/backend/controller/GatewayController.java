@@ -46,14 +46,14 @@ public class GatewayController {
         Map<String, String> validationResults = gatewayService.validateGatewayParameters(parameters);
         boolean isValid = "success".equals(validationResults.get("status"));
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("valid", isValid);
-
+        Map<String, Object> innerData = new HashMap<>();
+        innerData.put("valid", isValid);
         if (!isValid) {
-            // In a real application, we would return actual errors
-            // For this mock, we're always returning valid=true, so this is placeholder
-            response.put("errors", new HashMap<>());
+            innerData.put("errors", new HashMap<>());
         }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", innerData);
         
         return ResponseEntity.ok(response);
     }
@@ -62,9 +62,12 @@ public class GatewayController {
     public ResponseEntity<Map<String, Object>> saveGatewayConfiguration(@RequestBody Object config) {
         boolean success = gatewayService.saveGatewayConfiguration(config);
         
+        Map<String, Object> innerData = new HashMap<>();
+        innerData.put("success", success);
+        innerData.put("message", "Configuration saved successfully");
+        
         Map<String, Object> response = new HashMap<>();
-        response.put("success", success);
-        response.put("message", "Configuration saved successfully");
+        response.put("data", innerData);
         
         return ResponseEntity.ok(response);
     }

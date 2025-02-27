@@ -29,23 +29,22 @@ public class MeterController {
     public ResponseEntity<Map<String, Object>> getAllMeters() {
         List<Meter> meters = meterService.getAllMeters();
         
+        Map<String, Object> innerData = new HashMap<>();
+        innerData.put("data", meters);
         Map<String, Object> response = new HashMap<>();
-        response.put("data", meters);
+        response.put("data", innerData);
         
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/parameters")
-    public ResponseEntity<Map<String, Object>> getAllMeterParameters(@RequestParam(value = "meterId", required = false) String meterId) {
-        List<MeterParameter> meterParameters;
-        if (meterId == null || meterId.isEmpty()) {
-            meterParameters = meterService.getAllParameters(null);
-        } else {
-            meterParameters = meterService.getAllParameters(meterId);
-        }
+    public ResponseEntity<Map<String, Object>> getAllMeterParameters(@RequestParam(value = "meterId", required = false) Long meterId) {
+        List<MeterParameter> meterParameters = meterService.getAllParameters(meterId);
 
+        Map<String, Object> innerData = new HashMap<>();
+        innerData.put("data", meterParameters);
         Map<String, Object> response = new HashMap<>();
-        response.put("data", meterParameters);
+        response.put("data", innerData);
 
         return ResponseEntity.ok(response);
     }

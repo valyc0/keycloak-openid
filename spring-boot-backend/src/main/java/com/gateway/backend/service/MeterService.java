@@ -24,8 +24,8 @@ public class MeterService {
         return mockMeters;
     }
     
-    public List<MeterParameter> getAllParameters(String meterId) {
-        if (meterId == null || meterId.isEmpty()) {
+    public List<MeterParameter> getAllParameters(Long meterId) {
+        if (meterId == null) {
             System.out.println("Returning all mock parameters");
             return mockParameters;
         } else {
@@ -45,21 +45,21 @@ public class MeterService {
         String[] manufacturers = {"Schneider Electric", "Siemens", "Honeywell", "Johnson Controls", "ABB", "GE"};
         
         for (int i = 1; i <= 15; i++) {
-            String id = UUID.randomUUID().toString();
-            
             meters.add(Meter.builder()
-                    .id(String.valueOf(id))
+                    .id((long) i)
                     .name("Meter " + i)
                     .type(types[i % types.length])
                     .protocol(protocols[i % protocols.length])
                     .manufacturer(manufacturers[i % manufacturers.length])
+                    .model("Model-" + (i % 5 + 1))
+                    .serialNumber("M" + String.format("%05d", i))
                     .build());
         }
         
         return meters;
     }
     
-    private List<MeterParameter> generateMockParameters(String meterId) {
+    private List<MeterParameter> generateMockParameters(Long meterId) {
         List<MeterParameter> parameters = new ArrayList<>();
         
         // Common parameters

@@ -13,7 +13,7 @@ import lombok.Getter;
 @Getter
 public class MeterParameter {
     private Integer id;
-    private String meterId;
+    private Long meterId;
     private String name;
     private String description;
     private String type; // text, number, select, etc.
@@ -23,7 +23,7 @@ public class MeterParameter {
     private Integer max;
     private String[] options;
 
-    public String getMeterId() {
+    public Long getMeterId() {
         return meterId;
     }
 }

@@ -7,6 +7,10 @@ backup/
 .DS_Store
 node_modules/
 
+# Java compiled files
+*.class
+target/
+**/target/
 
 # IDE files
 .idea/
