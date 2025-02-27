@@ -82,19 +82,15 @@ const mockApiHandler = async (config) => {
     return delayResponse({ data: mockSites });
   }
 
-  
-    if (path === '/meters' && method?.toLowerCase() === 'get') {
-      return delayResponse({ data: { data: mockMeters } });
-    }
+  if (path === '/meters' && method?.toLowerCase() === 'get') {
+    return delayResponse({ data: { data: mockMeters } });
+  }
+
   if (path === '/meters/parameters' && method?.toLowerCase() === 'get') {
     const { meterId } = config.params || {};
     console.log(`[Mock API] Getting meter parameters for meterId: ${meterId}`);
     
-    // If meterId is provided, we'll clone the parameters for that specific meter
-    // This allows each meter to have its own set of parameters
     if (meterId) {
-      // We could customize parameters per meter type in a real implementation
-      // For now, just return the standard parameters for any meter ID
       return delayResponse({ 
         data: { 
           data: METER_PARAMETERS.map(param => ({...param}))
@@ -102,7 +98,6 @@ const mockApiHandler = async (config) => {
       });
     }
     
-    // If no meterId, return all parameters
     return delayResponse({ 
       data: {
         data: METER_PARAMETERS
@@ -116,7 +111,6 @@ const mockApiHandler = async (config) => {
     let hasErrors = false;
     
     Object.entries(data).forEach(([meterId, parameters]) => {
-      // Handle meterId as number for validation errors
       const meterIdNum = Number(meterId);
       parameters.forEach(param => {
         if (param.required && (!param.value || param.value.trim() === '')) {
@@ -170,28 +164,30 @@ const mockApiHandler = async (config) => {
       return delayResponse(alarmOptions.callTypes);
     }
     if (path === '/alarms/carriers') {
-      // Return array of carrier names
       return delayResponse(alarmOptions.carriers);
     }
     if (path === '/alarms/statuses') {
-      // Map statuses with consistent IDs that match their usage in mockAlarms
       return delayResponse(alarmOptions.statuses);
     }
     if (path === '/alarms/suggestions') {
       const field = config.params?.field;
-      const query = config.params?.query;
+      const query = config.params?.query?.toLowerCase() || '';
       const limit = config.params?.limit || 5;
 
-      const suggestions = [...new Set(
+      // Get unique values for the specified field
+      const uniqueValues = [...new Set(
         mockAlarms
           .map(alarm => alarm[field])
-          .filter(value =>
-            value &&
-            String(value).toLowerCase().includes(String(query).toLowerCase())
-          )
-      )].slice(0, limit);
+          .filter(Boolean) // Remove null/undefined values
+      )];
 
-      return delayResponse({ data: suggestions });
+      // Filter and limit suggestions
+      const suggestions = uniqueValues
+        .filter(value => String(value).toLowerCase().includes(query))
+        .slice(0, limit);
+
+      console.log(`[Mock API] Suggestions for ${field}:`, suggestions);
+      return delayResponse(suggestions);
     }
     
     if (path === '/alarms') {
@@ -243,11 +239,10 @@ const mockApiHandler = async (config) => {
   }
 
   if (path === '/alarms' && method?.toLowerCase() === 'post') {
-    // Find the highest ID and increment
     const maxId = Math.max(...mockAlarms.map(a => Number(a.id)));
     const newAlarm = {
       ...data,
-      id: maxId + 1, // ID as number
+      id: maxId + 1,
       gatewayId: Number(data.gatewayId),
       timestamp: new Date().toISOString()
     };
@@ -257,7 +252,6 @@ const mockApiHandler = async (config) => {
 
   if (path.match(/^\/alarms\/[^/]+$/) && method?.toLowerCase() === 'put') {
     const pathId = Number(path.split('/').pop());
-    // Find alarm by numeric ID
     const index = mockAlarms.findIndex(a => a.id === pathId);
     if (index !== -1) {
       const updatedAlarm = { ...mockAlarms[index], ...data, id: pathId };
@@ -269,7 +263,6 @@ const mockApiHandler = async (config) => {
 
   if (path.match(/^\/alarms\/[^/]+$/) && method?.toLowerCase() === 'delete') {
     const pathId = Number(path.split('/').pop());
-    // Find alarm by numeric ID
     const index = mockAlarms.findIndex(a => a.id === pathId);
     if (index !== -1) {
       mockAlarms.splice(index, 1);
@@ -304,10 +297,8 @@ export const setupFakeBackend = (api) => {
       });
     } catch (error) {
       if (error.message === 'MOCK_HANDLER_NOT_FOUND') {
-        // If no mock handler was found, forward to real external API
         console.log(`[Mock API] No handler found for ${config.method?.toUpperCase()} ${config.url}`);
         console.log(`[Mock API] Forwarding to real API...`);
-        // Keep the original config to maintain consistency
         return config;
       }
       return Promise.reject(error);
@@ -316,18 +307,14 @@ export const setupFakeBackend = (api) => {
 
   // Add response interceptor
   api.interceptors.response.use(
-    // Handle successful responses (from real API)
     response => {
       console.log('[Mock API] Real API response:', response);
       return response;
     },
-    // Handle errors
     async (error) => {
-      // If we have a mock response in the error, it means it's our mock data
       if (error.response) {
         return error.response;
       }
-      // Otherwise, it's a real error from the API
       console.error('[Mock API] Real API error:', error);
       return Promise.reject(error);
     }

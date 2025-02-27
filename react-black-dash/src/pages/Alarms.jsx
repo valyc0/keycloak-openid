@@ -70,8 +70,8 @@ const Alarms = () => {
     setSearchInputs(prev => ({ ...prev, [field]: value }));
     try {
       if (value.trim()) {
-        const response = await alarmService.getSuggestions({ field, query: value });
-        setSuggestions(prev => ({ ...prev, [field]: response.data }));
+        const suggestionData = await alarmService.getSuggestions({ field, query: value });
+        setSuggestions(prev => ({ ...prev, [field]: suggestionData }));
       } else {
         setSuggestions(prev => ({ ...prev, [field]: [] }));
       }
