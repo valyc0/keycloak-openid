@@ -135,17 +135,18 @@ const Alarms = () => {
       console.log('Response keys:', Object.keys(response));
       
       // Ensure we're working with proper JSON
+      let parsedResponse = response;
       if (typeof response === 'string') {
         try {
-          response = JSON.parse(response);
+          parsedResponse = JSON.parse(response);
         } catch (e) {
           console.error('Failed to parse response:', e);
         }
       }
       
-      console.log('Parsed Response:', response);
-      setAlarms(response?.data || []);
-      setTotalAlarms(response?.total || 0);
+      console.log('Parsed Response:', parsedResponse);
+      setAlarms(parsedResponse?.data || []);
+      setTotalAlarms(parsedResponse?.total || 0);
       setError(null);
     } catch (err) {
       setError('Error fetching alarms');
