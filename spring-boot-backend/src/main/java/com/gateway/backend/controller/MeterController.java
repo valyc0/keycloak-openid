@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -35,7 +36,17 @@ public class MeterController {
     }
 
     @GetMapping("/parameters")
-    public ResponseEntity<List<MeterParameter>> getAllMeterParameters() {
-        return ResponseEntity.ok(meterService.getAllParameters());
+    public ResponseEntity<Map<String, Object>> getAllMeterParameters(@RequestParam(value = "meterId", required = false) String meterId) {
+        List<MeterParameter> meterParameters;
+        if (meterId == null || meterId.isEmpty()) {
+            meterParameters = meterService.getAllParameters(null);
+        } else {
+            meterParameters = meterService.getAllParameters(meterId);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", meterParameters);
+
+        return ResponseEntity.ok(response);
     }
 }

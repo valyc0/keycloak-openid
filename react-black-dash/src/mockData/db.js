@@ -23,7 +23,9 @@ export const mockMeters = Array.from({ length: 50 }, (_, i) => ({
   name: `Meter ${i + 1}`,
   type: meterTypes[Math.floor(Math.random() * meterTypes.length)],
   protocol: ['MODBUS', 'MQTT', 'HTTP'][Math.floor(Math.random() * 3)],
-  manufacturer: ['Schneider', 'ABB', 'Siemens', 'GE'][Math.floor(Math.random() * 4)]
+  manufacturer: ['Schneider', 'ABB', 'Siemens', 'GE'][Math.floor(Math.random() * 4)],
+  model: `Model-${Math.floor(Math.random() * 5) + 1}`,
+  serialNumber: `M${String(i + 1).padStart(5, '0')}`
 }));
 
 export const METER_PARAMETERS = [

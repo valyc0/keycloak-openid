@@ -16,7 +16,7 @@ const SelectMeters = ({
       try {
         const response = await gatewayService.getMeters();
         console.log('getMeters response:', response);
-        setMeters(response);
+        setMeters(response.data.data);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching meters:', err);
@@ -29,10 +29,23 @@ const SelectMeters = ({
   }, []);
 
   const handleMeterAdd = (meterId) => {
-    const meter = meters.find((m) => m.id === meterId);
-    if (meter && !selectedMeters.find((m) => m.id === meter.id)) {
-      onMeterSelect(meter);
-      onMeterParametersInit(meter.id);
+    // Ensure meterId is treated as the correct type for comparison
+    // Some dropdown values might be strings while IDs in objects might be numbers
+    const meter = meters.find((m) => String(m.id) === String(meterId));
+    
+    if (meter) {
+      // Verify if meter is already selected
+      const isAlreadySelected = selectedMeters.some((m) => String(m.id) === String(meter.id));
+      
+      if (!isAlreadySelected) {
+        console.log('Adding meter:', meter);
+        onMeterSelect(meter);
+        onMeterParametersInit(meter.id);
+      } else {
+        console.log('Meter already selected:', meter);
+      }
+    } else {
+      console.log('Meter not found with ID:', meterId);
     }
   };
 
@@ -59,7 +72,9 @@ const SelectMeters = ({
     );
   }
   const getAvailableMeters = () => {
-    return meters ? meters.filter((m) => !selectedMeters.find((sm) => sm.id === m.id)) : [];
+    return Array.isArray(meters) 
+      ? meters.filter((m) => !selectedMeters.some((sm) => String(sm.id) === String(m.id))) 
+      : [];
   };
 
   return (

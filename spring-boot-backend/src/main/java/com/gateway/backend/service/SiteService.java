@@ -30,7 +30,7 @@ public class SiteService {
         String[] states = {"NY", "CA", "IL", "TX", "AZ", "PA", "FL", "OH", "WA", "NC", "IN"};
         
         for (int i = 1; i <= 20; i++) {
-            String id = UUID.randomUUID().toString();
+            Long id = (long) i;
             int cityIndex = i % cities.length;
             int stateIndex = i % states.length;
             

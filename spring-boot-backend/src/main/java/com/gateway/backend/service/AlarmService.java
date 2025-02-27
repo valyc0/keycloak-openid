@@ -111,8 +111,8 @@ public class AlarmService {
     
     private String getAlarmPropertyValue(Alarm alarm, String propertyName) {
         switch (propertyName.toLowerCase()) {
-            case "id": return alarm.getId();
-            case "gatewayid": return alarm.getGatewayId();
+            case "id": return String.valueOf(alarm.getId());
+            case "gatewayid": return String.valueOf(alarm.getGatewayId());
             case "gatewayname": return alarm.getGatewayName();
             case "type": return alarm.getType();
             case "severity": return alarm.getSeverity();
@@ -120,7 +120,7 @@ public class AlarmService {
             case "status": return alarm.getStatus();
             case "calltype": return alarm.getCallType();
             case "carrier": return alarm.getCarrier();
-            case "siteid": return alarm.getSiteId();
+            case "siteid": return String.valueOf(alarm.getSiteId());
             case "sitename": return alarm.getSiteName();
             default: return null;
         }
@@ -128,7 +128,7 @@ public class AlarmService {
     
     private List<Alarm> generateMockAlarms() {
         List<Alarm> alarms = new ArrayList<>();
-        
+
         String[] types = {"Connection Lost", "Power Failure", "Hardware Error", "Configuration Error", "Security Alert"};
         String[] severities = {"Low", "Medium", "High", "Critical"};
         String[] statuses = {"Open", "In Progress", "Resolved", "Closed"};
@@ -146,11 +146,11 @@ public class AlarmService {
             "Network interface error",
             "Software update failed"
         };
-        
+
         for (int i = 1; i <= 100; i++) {
-            String id = UUID.randomUUID().toString();
-            String gatewayId = UUID.randomUUID().toString();
-            String siteId = UUID.randomUUID().toString();
+            Long id = (long) i;
+            Long gatewayId = (long) i;
+            Long siteId = (long) i;
             
             // For the new requirements
             String callType = callTypes[i % callTypes.length];

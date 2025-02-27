@@ -82,12 +82,32 @@ const mockApiHandler = async (config) => {
     return delayResponse({ data: mockSites });
   }
 
-  if (path === '/meters' && method?.toLowerCase() === 'get') {
-    return delayResponse({ data: mockMeters });
-  }
-
+  
+    if (path === '/meters' && method?.toLowerCase() === 'get') {
+      return delayResponse({ data: { data: mockMeters } });
+    }
   if (path === '/meters/parameters' && method?.toLowerCase() === 'get') {
-    return delayResponse({ data: {data: METER_PARAMETERS} });
+    const { meterId } = config.params || {};
+    console.log(`[Mock API] Getting meter parameters for meterId: ${meterId}`);
+    
+    // If meterId is provided, we'll clone the parameters for that specific meter
+    // This allows each meter to have its own set of parameters
+    if (meterId) {
+      // We could customize parameters per meter type in a real implementation
+      // For now, just return the standard parameters for any meter ID
+      return delayResponse({ 
+        data: { 
+          data: METER_PARAMETERS.map(param => ({...param}))
+        }
+      });
+    }
+    
+    // If no meterId, return all parameters
+    return delayResponse({ 
+      data: {
+        data: METER_PARAMETERS
+      }
+    });
   }
 
   if (path === '/gateways/validate' && method?.toLowerCase() === 'post') {

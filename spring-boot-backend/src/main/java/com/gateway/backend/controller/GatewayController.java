@@ -43,11 +43,12 @@ public class GatewayController {
 
     @PostMapping("/validate")
     public ResponseEntity<Map<String, Object>> validateGatewayParameters(@RequestBody Object parameters) {
-        boolean isValid = gatewayService.validateGatewayParameters(parameters);
-        
+        Map<String, String> validationResults = gatewayService.validateGatewayParameters(parameters);
+        boolean isValid = "success".equals(validationResults.get("status"));
+
         Map<String, Object> response = new HashMap<>();
         response.put("valid", isValid);
-        
+
         if (!isValid) {
             // In a real application, we would return actual errors
             // For this mock, we're always returning valid=true, so this is placeholder

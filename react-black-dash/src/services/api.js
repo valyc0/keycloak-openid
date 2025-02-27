@@ -139,7 +139,7 @@ export const gatewayService = {
 
   async getMeters() {
     const response = await api.get('/meters');
-    return response.data.data;
+    return response.data;
   },
 
   async getMeterParameters() {

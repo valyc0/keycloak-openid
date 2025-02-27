@@ -4,6 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Getter;
+import jakarta.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 
 import java.time.LocalDateTime;
 
@@ -11,9 +16,13 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Entity
 public class Alarm {
-    private String id;
-    private String gatewayId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private Long gatewayId;
     private String gatewayName;
     private String type;
     private String severity;
@@ -22,7 +31,7 @@ public class Alarm {
     private String status;
     private String callType;
     private String carrier;
-    private String siteId;
+    private Long siteId;
     private String siteName;
     private String caller;
     

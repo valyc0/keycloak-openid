@@ -6,25 +6,35 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.UUID;
 
 @Service
 public class MeterService {
     
     private final List<Meter> mockMeters;
-    private final List<MeterParameter> mockParameters;
+    private List<MeterParameter> mockParameters;
     
     public MeterService() {
         this.mockMeters = generateMockMeters();
-        this.mockParameters = generateMockParameters();
+        this.mockParameters = generateAllMockParameters();
     }
     
     public List<Meter> getAllMeters() {
         return mockMeters;
     }
     
-    public List<MeterParameter> getAllParameters() {
-        return mockParameters;
+    public List<MeterParameter> getAllParameters(String meterId) {
+        if (meterId == null || meterId.isEmpty()) {
+            System.out.println("Returning all mock parameters");
+            return mockParameters;
+        } else {
+            List<MeterParameter> filteredList = mockParameters.stream()
+                    .filter(parameter -> meterId.equals(parameter.getMeterId()))
+                    .collect(Collectors.toList());
+            System.out.println("Returning filtered list for meterId: " + meterId + ", list: " + filteredList);
+            return filteredList;
+        }
     }
     
     private List<Meter> generateMockMeters() {
@@ -38,7 +48,7 @@ public class MeterService {
             String id = UUID.randomUUID().toString();
             
             meters.add(Meter.builder()
-                    .id(id)
+                    .id(String.valueOf(id))
                     .name("Meter " + i)
                     .type(types[i % types.length])
                     .protocol(protocols[i % protocols.length])
@@ -49,21 +59,23 @@ public class MeterService {
         return meters;
     }
     
-    private List<MeterParameter> generateMockParameters() {
+    private List<MeterParameter> generateMockParameters(String meterId) {
         List<MeterParameter> parameters = new ArrayList<>();
         
         // Common parameters
         parameters.add(MeterParameter.builder()
-                .id("address")
+                .id(1)
+                .meterId(meterId)
                 .name("Device Address")
                 .description("Physical or logical address for the meter")
-                .type("text")
-                .defaultValue("")
+                .type("number")
+                .defaultValue("123")
                 .required(true)
                 .build());
                 
         parameters.add(MeterParameter.builder()
-                .id("pollRate")
+                .id(2)
+                .meterId(meterId)
                 .name("Poll Rate")
                 .description("How often to poll this device (seconds)")
                 .type("number")
@@ -74,7 +86,8 @@ public class MeterService {
                 .build());
                 
         parameters.add(MeterParameter.builder()
-                .id("timeout")
+                .id(3)
+                .meterId(meterId)
                 .name("Timeout")
                 .description("Communication timeout in seconds")
                 .type("number")
@@ -86,7 +99,8 @@ public class MeterService {
         
         // Protocol specific parameters
         parameters.add(MeterParameter.builder()
-                .id("baudRate")
+                .id(4)
+                .meterId(meterId)
                 .name("Baud Rate")
                 .description("Serial communication speed")
                 .type("select")
@@ -96,7 +110,8 @@ public class MeterService {
                 .build());
                 
         parameters.add(MeterParameter.builder()
-                .id("parity")
+                .id(5)
+                .meterId(meterId)
                 .name("Parity")
                 .description("Error detection method")
                 .type("select")
@@ -106,7 +121,8 @@ public class MeterService {
                 .build());
                 
         parameters.add(MeterParameter.builder()
-                .id("dataBits")
+                .id(6)
+                .meterId(meterId)
                 .name("Data Bits")
                 .description("Number of data bits")
                 .type("select")
@@ -116,7 +132,8 @@ public class MeterService {
                 .build());
                 
         parameters.add(MeterParameter.builder()
-                .id("stopBits")
+                .id(7)
+                .meterId(meterId)
                 .name("Stop Bits")
                 .description("Number of stop bits")
                 .type("select")
@@ -126,7 +143,8 @@ public class MeterService {
                 .build());
                 
         parameters.add(MeterParameter.builder()
-                .id("ipAddress")
+                .id(8)
+                .meterId(meterId)
                 .name("IP Address")
                 .description("Network address for TCP communication")
                 .type("text")
@@ -135,7 +153,8 @@ public class MeterService {
                 .build());
                 
         parameters.add(MeterParameter.builder()
-                .id("port")
+                .id(9)
+                .meterId(meterId)
                 .name("Port")
                 .description("Network port for TCP communication")
                 .type("number")
@@ -146,5 +165,13 @@ public class MeterService {
                 .build());
         
         return parameters;
+    }
+
+    private List<MeterParameter> generateAllMockParameters() {
+        List<MeterParameter> allParameters = new ArrayList<>();
+        for (Meter meter : mockMeters) {
+            allParameters.addAll(generateMockParameters(meter.getId()));
+        }
+        return allParameters;
     }
 }

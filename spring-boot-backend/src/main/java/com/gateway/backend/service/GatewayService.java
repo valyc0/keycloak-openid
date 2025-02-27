@@ -5,7 +5,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -71,10 +73,35 @@ public class GatewayService {
         return mockGateways.size();
     }
     
-    public boolean validateGatewayParameters(Object parameters) {
-        // In a real application, this would validate actual parameters
-        // For this mock, we always return true
-        return true;
+    public Map<String, String> validateGatewayParameters(Object parameters) {
+        Map<String, String> validationResults = new HashMap<>();
+    
+        if (parameters == null) {
+            validationResults.put("error", "Parameters are null");
+            return validationResults;
+        }
+    
+        if (!(parameters instanceof Map)) {
+            validationResults.put("error", "Parameters are not a map");
+            return validationResults;
+        }
+    
+        Map<?, ?> paramsMap = (Map<?, ?>) parameters;
+    
+        if (!paramsMap.containsKey("serialNumber")) {
+            validationResults.put("serialNumber", "Serial number is missing");
+        }
+    
+        // Add more specific validation logic here
+        // For example, check other required keys and their values
+    
+        if (validationResults.isEmpty()) {
+            validationResults.put("status", "success");
+        } else {
+            validationResults.put("status", "failure");
+        }
+    
+        return validationResults;
     }
     
     public boolean saveGatewayConfiguration(Object config) {
@@ -93,8 +120,8 @@ public class GatewayService {
         String[] carriers = {"AT&T", "Verizon", "T-Mobile", "Sprint", "Vodafone", "Orange", "Telefonica"};
         
         for (int i = 1; i <= 50; i++) {
-            String id = UUID.randomUUID().toString();
-            String siteId = UUID.randomUUID().toString();
+            Long id = (long) i;
+            String siteId = String.valueOf(i);
             
             gateways.add(Gateway.builder()
                     .id(id)
