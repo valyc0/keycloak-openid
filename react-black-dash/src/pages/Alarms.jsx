@@ -99,13 +99,22 @@ const Alarms = () => {
     setShowSuggestions(prev => ({ ...prev, [field]: show }));
   };
 
-  const handleClearFilters = () => {
-    setFilters({});
-    setSearchInputs({});
-    setSuggestions({});
-    setCurrentPage(1);
-    fetchAlarms({});
-  };
+  const handleClearFilters = useCallback(async () => {
+    try {
+      // First fetch with empty filters
+      await fetchAlarms({});
+      
+      // Then clear all states after successful fetch
+      setFilters({});
+      setSearchInputs({});
+      setSuggestions({});
+      setCurrentPage(1);
+      setShowSuggestions({});
+    } catch (err) {
+      console.error('Error clearing filters:', err);
+      setError('Failed to clear filters');
+    }
+  }, []);
 
   // Fetch alarms data
   const fetchAlarms = async (newFilters = {}) => {
