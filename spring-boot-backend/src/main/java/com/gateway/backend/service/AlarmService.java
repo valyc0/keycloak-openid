@@ -122,6 +122,8 @@ public class AlarmService {
             case "carrier": return alarm.getCarrier();
             case "siteid": return String.valueOf(alarm.getSiteId());
             case "sitename": return alarm.getSiteName();
+            case "caller_number": return alarm.getCaller_number();
+            case "callee_number": return alarm.getCallee_number();
             default: return null;
         }
     }

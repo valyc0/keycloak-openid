@@ -29,23 +29,38 @@ public class AlarmController {
             @RequestParam(required = false, defaultValue = "desc") String sortOrder,
             @RequestParam Map<String, String> allParams) {
         
-        // Remove pagination and sorting parameters from filters
-        Map<String, String> filters = new HashMap<>(allParams);
-        filters.remove("page");
-        filters.remove("pageSize");
-        filters.remove("sortBy");
-        filters.remove("sortOrder");
-        
-        List<Alarm> alarms = alarmService.getAlarms(filters, page, pageSize, sortBy, sortOrder);
-        int total = alarmService.getTotalAlarms(filters);
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("data", alarms);
-        response.put("total", total);
-        response.put("page", page);
-        response.put("pageSize", pageSize);
-        
-        return ResponseEntity.ok(response);
+        try {
+            // Remove pagination and sorting parameters from filters
+            Map<String, String> filters = new HashMap<>(allParams);
+            filters.remove("page");
+            filters.remove("pageSize");
+            filters.remove("sortBy");
+            filters.remove("sortOrder");
+            
+            List<Alarm> alarms = alarmService.getAlarms(filters, page, pageSize, sortBy, sortOrder);
+            int total = alarmService.getTotalAlarms(filters);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("data", alarms);
+            response.put("total", total);
+            response.put("page", page);
+            response.put("pageSize", pageSize);
+            
+            // Log response for debugging
+            System.out.println("Response data: " + response);
+            
+            return ResponseEntity
+                    .ok()
+                    .header("Content-Type", "application/json")
+                    .body(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity
+                    .internalServerError()
+                    .body(errorResponse);
+        }
     }
 
     @GetMapping("/call-types")

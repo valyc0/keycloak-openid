@@ -95,14 +95,32 @@ api.interceptors.request.use(
 
 // Error interceptor for common API errors
 api.interceptors.response.use(
-  response => response,
+  response => {
+    // Log successful response data for debugging
+    console.log('[API Response]', {
+      url: response.config.url,
+      method: response.config.method,
+      status: response.status,
+      data: response.data
+    });
+    try {
+      // Ensure response data is properly parsed JSON
+      if (typeof response.data === 'string') {
+        response.data = JSON.parse(response.data);
+      }
+    } catch (e) {
+      console.error('[API Response] Failed to parse JSON:', e);
+    }
+    return response;
+  },
   error => {
     if (error.response) {
       // Server responded with non-2xx status
       console.error('[API Error]', JSON.stringify({
         status: error.response.status,
         data: error.response.data,
-        endpoint: error.config.url
+        endpoint: error.config.url,
+        headers: error.response.headers
       }, null, 2));
     } else if (error.request) {
       // Request made but no response received
@@ -167,7 +185,15 @@ export const gatewayService = {
 export const alarmService = {
   async getAll({ page = 1, pageSize = 10, sortBy = 'id', sortOrder = 'asc', ...filters }) {
     const response = await api.get('/alarms', { params: { page, pageSize, sortBy, sortOrder, ...filters } });
-    return response.data;
+    console.log('API Response:', response);
+    console.log('Response Data:', response.data);
+    // Make sure we have proper data structure
+    return {
+      data: response.data?.data || [],
+      total: response.data?.total || 0,
+      page: response.data?.page || 1,
+      pageSize: response.data?.pageSize || 10
+    };
   },
 
   async create(alarm) {

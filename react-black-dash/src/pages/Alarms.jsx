@@ -121,9 +121,22 @@ const Alarms = () => {
         sortOrder,
         ...currentFilters
       });
-      console.log('Response:', response);
-      setAlarms(response.data);
-      setTotalAlarms(response.total);
+      console.log('Raw Response:', response);
+      console.log('Data type:', typeof response);
+      console.log('Response keys:', Object.keys(response));
+      
+      // Ensure we're working with proper JSON
+      if (typeof response === 'string') {
+        try {
+          response = JSON.parse(response);
+        } catch (e) {
+          console.error('Failed to parse response:', e);
+        }
+      }
+      
+      console.log('Parsed Response:', response);
+      setAlarms(response?.data || []);
+      setTotalAlarms(response?.total || 0);
       setError(null);
     } catch (err) {
       setError('Error fetching alarms');
