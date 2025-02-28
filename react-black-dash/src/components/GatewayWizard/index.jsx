@@ -211,33 +211,68 @@ const GatewayWizard = () => {
   };
 
   return (
-    <div className="container-fluid p-4">
-      <WizardProgress
-        step={step}
-        totalSteps={4}
-        onNext={() => (step === 4 ? handleSubmit() : setStep((s) => s + 1))}
-        onPrevious={() => setStep((s) => s - 1)}
-        isNextDisabled={isNextDisabled()}
-        isSubmit={step === 4}
-      />
-
-      {error && (
-        <div className="alert alert-danger mt-3" role="alert">
-          <i className="fa fa-exclamation-triangle mr-2"></i>
-          {error}
-        </div>
-      )}
-
-      {selectedGateway && (
-        <SummaryDisplay
-          selectedGateway={selectedGateway}
-          gatewayName={gatewayName}
-          selectedSite={selectedSite}
-          selectedMeters={selectedMeters}
+    <div className="wizard-container">
+      <div className="wizard-nav-sticky">
+        <WizardProgress
+          step={step}
+          totalSteps={4}
+          onNext={() => {}}  // Moved to sticky buttons
+          onPrevious={() => {}}  // Moved to sticky buttons
+          isNextDisabled={isNextDisabled()}
+          isSubmit={step === 4}
         />
-      )}
 
-      {renderStep()}
+        {error && (
+          <div className="alert alert-danger mt-3 mb-0" role="alert">
+            <i className="fa fa-exclamation-triangle mr-2"></i>
+            {error}
+          </div>
+        )}
+
+        {selectedGateway && (
+          <SummaryDisplay
+            selectedGateway={selectedGateway}
+            gatewayName={gatewayName}
+            selectedSite={selectedSite}
+            selectedMeters={selectedMeters}
+          />
+        )}
+      </div>
+
+      <div className="wizard-content">
+        {renderStep()}
+      </div>
+
+      <div className="wizard-actions-sticky">
+        {step > 1 && (
+          <button
+            type="button"
+            className="btn btn-outline-primary"
+            onClick={() => setStep((s) => s - 1)}
+          >
+            <i className="fa fa-arrow-left mr-2"></i>
+            Previous
+          </button>
+        )}
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => (step === 4 ? handleSubmit() : setStep((s) => s + 1))}
+          disabled={isNextDisabled()}
+        >
+          {step === 4 ? (
+            <>
+              <i className="fa fa-check mr-2"></i>
+              Submit
+            </>
+          ) : (
+            <>
+              Next
+              <i className="fa fa-arrow-right ml-2"></i>
+            </>
+          )}
+        </button>
+      </div>
 
       {isModalOpen && (
             <>

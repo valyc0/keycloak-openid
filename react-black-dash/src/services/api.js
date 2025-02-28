@@ -80,12 +80,22 @@ api.interceptors.request.use(
     // Get token from centralized token manager
     const token = authTokenManager.getToken();
 
+    // Log token status (in development only)
+    if (import.meta.env.DEV) {
+      console.log(`[API Request] ${config.method.toUpperCase()} ${config.url}`, {
+        hasToken: !!token,
+        tokenPrefix: token ? token.substr(0, 10) + '...' : null
+      });
+    }
+
     // If token exists, add it to the Authorization header
     if (token) {
       config.headers = {
         ...config.headers,
         'Authorization': `Bearer ${token}`
       };
+    } else {
+      console.warn('[API Request] No auth token available');
     }
     
     return config;
@@ -116,12 +126,13 @@ api.interceptors.response.use(
   error => {
     if (error.response) {
       // Server responded with non-2xx status
-      console.error('[API Error]', JSON.stringify({
+      console.error('[API Error]', {
         status: error.response.status,
         data: error.response.data,
         endpoint: error.config.url,
-        headers: error.response.headers
-      }, null, 2));
+        headers: error.response.headers,
+        hasAuthToken: !!error.config.headers['Authorization'] // Log if request had auth token
+      });
     } else if (error.request) {
       // Request made but no response received
       console.error('[API Error] No response received:', error.request);
@@ -160,10 +171,6 @@ export const gatewayService = {
     return response.data;
   },
 
-  async getMeterParameters() {
-    const response = await api.get('/meters/parameters');
-    return response.data;
-  },
   async getMeterParameters(meterId) {
     const response = await api.get('/meters/parameters', {
       params: { meterId }
@@ -185,9 +192,6 @@ export const gatewayService = {
 export const alarmService = {
   async getAll({ page = 1, pageSize = 10, sortBy = 'id', sortOrder = 'asc', ...filters }) {
     const response = await api.get('/alarms', { params: { page, pageSize, sortBy, sortOrder, ...filters } });
-    console.log('API Response:', response);
-    console.log('Response Data:', response.data);
-    // Make sure we have proper data structure
     return {
       data: response.data?.data || [],
       total: response.data?.total || 0,

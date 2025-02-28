@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import Sidebar from './Sidebar/Sidebar';
 import Header from './Header/Header';
 import { useState, useEffect } from 'react';
-import ApiModeToggle from './ApiModeToggle';
 
 const Layout = ({ children }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -73,7 +72,6 @@ const Layout = ({ children }) => {
           {children}
         </div>
       </div>
-      <ApiModeToggle />
     </div>
   );
 };

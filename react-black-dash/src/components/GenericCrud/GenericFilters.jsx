@@ -63,9 +63,9 @@ const GenericFilters = ({
           </div>
         </div>
       ))}
-      <div className="col-md-3 d-flex align-items-end">
-        <button 
-          className="btn btn-secondary mb-3"
+      <div className="col-md-3 d-flex align-items-end mb-3">
+        <button
+          className="btn btn-secondary"
           onClick={onClearFilters}
         >
           Clear Filters

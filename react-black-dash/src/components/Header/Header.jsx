@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthProvider';
+import ApiModeToggle from '../ApiModeToggle';
 import './Header.css';
 
 const Header = ({ onToggleSidebar, sidebarCollapsed }) => {
@@ -84,6 +85,7 @@ const Header = ({ onToggleSidebar, sidebarCollapsed }) => {
         </div>
       </div>
       <div className="d-flex align-items-center">
+        <ApiModeToggle />
         <div className="dropdown">
           <div 
             className={`d-flex align-items-center dropdown-toggle ${isDropdownOpen ? 'show' : ''}`}
@@ -99,7 +101,7 @@ const Header = ({ onToggleSidebar, sidebarCollapsed }) => {
            <div className="ms-2 text-start">
              <div className="fw-normal" style={{ fontSize: '0.875rem' }}>{userInfo.username || userInfo.name || 'User'}</div>
              <div className="text-white-50 small" style={{ fontSize: '0.75rem', marginTop: '-3px' }}>{userInfo.email || ''}</div>
-            </div>
+           </div>
           </div>
           <ul className={`dropdown-menu dropdown-menu-end ${isDropdownOpen ? 'show' : ''}`}>
             <li>

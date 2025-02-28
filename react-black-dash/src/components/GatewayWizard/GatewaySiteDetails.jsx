@@ -56,68 +56,54 @@ const GatewaySiteDetails = ({
       <div className="card-header">
         <strong className="card-title">Gateway Details & Site</strong>
       </div>
-      <div className="card-body">
+      <div className="card-body gateway-form">
         <div className="row">
           <div className="col-md-6">
             <div className="form-group">
               <label htmlFor="gatewayName">Gateway Name</label>
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <span className="input-group-text">
-                    <i className="fa fa-server"></i>
-                  </span>
-                </div>
-                <input
-                  type="text"
-                  id="gatewayName"
-                  className="form-control"
-                  value={gatewayName}
-                  onChange={(e) => onGatewayNameChange(e.target.value)}
-                  placeholder="Enter gateway name"
-                  disabled
-                />
-              </div>
+              <input
+                type="text"
+                id="gatewayName"
+                className="form-control"
+                value={gatewayName}
+                onChange={(e) => onGatewayNameChange(e.target.value)}
+                placeholder="Enter gateway name"
+                disabled
+              />
             </div>
           </div>
           <div className="col-md-6">
             <div className="form-group">
               <label htmlFor="site">Site Location</label>
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <span className="input-group-text">
-                    <i className="fa fa-building"></i>
-                  </span>
-                </div>
-                <select
-                  id="site"
-                  className="form-control"
-                  value={selectedSite?.id || ''}
-                  onChange={(e) => {
-                    const siteId = e.target.value;
-                    if (!siteId) {
-                      onSiteSelect(null);
-                      return;
-                    }
-                    const site = sites.find((s) => s.id === Number(siteId));
-                    if (site) {
-                      onSiteSelect(site);
-                    }
-                  }}
-                >
-                  <option value="">Select site...</option>
-                  {sites.map((site) => (
-                    <option key={site.id} value={site.id}>
-                      {site.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <select
+                id="site"
+                className="form-control"
+                value={selectedSite?.id || ''}
+                onChange={(e) => {
+                  const siteId = e.target.value;
+                  if (!siteId) {
+                    onSiteSelect(null);
+                    return;
+                  }
+                  const site = sites.find((s) => s.id === Number(siteId));
+                  if (site) {
+                    onSiteSelect(site);
+                  }
+                }}
+              >
+                <option value="">Select site...</option>
+                {sites.map((site) => (
+                  <option key={site.id} value={site.id}>
+                    {site.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
 
         {selectedSite && (
-          <div className="mt-4 p-3 bg-light rounded">
+          <div className="mt-4 p-3 rounded" style={{ background: 'var(--gateway-summary-background)' }}>
             <h6 className="mb-3">Site Details</h6>
             <div className="row">
               <div className="col-md-6">

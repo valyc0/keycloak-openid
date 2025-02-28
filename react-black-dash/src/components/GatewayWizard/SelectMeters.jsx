@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { gatewayService } from '../../services/api';
+import SearchableTable from './SearchableTable';
+import './GatewayWizard.css';
 
 const SelectMeters = ({
   selectedMeters,
@@ -12,42 +15,50 @@ const SelectMeters = ({
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const fetchMeters = async () => {
       try {
-        const response = await gatewayService.getMeters();
-        console.log('getMeters response:', response);
-        setMeters(response.data.data);
-        setLoading(false);
+        setLoading(true);
+        const response = await gatewayService.getMeters(abortController.signal);
+        // Only update state if component is still mounted
+        if (!abortController.signal.aborted) {
+          setMeters(response.data.data);
+          setLoading(false);
+        }
       } catch (err) {
-        console.error('Error fetching meters:', err);
-        setError('Failed to load meters');
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          console.error('Error fetching meters:', err);
+          setError('Failed to load meters');
+          setLoading(false);
+        }
       }
     };
 
     fetchMeters();
-  }, []);
 
-  const handleMeterAdd = (meterId) => {
-    // Ensure meterId is treated as the correct type for comparison
-    // Some dropdown values might be strings while IDs in objects might be numbers
-    const meter = meters.find((m) => String(m.id) === String(meterId));
-    
-    if (meter) {
-      // Verify if meter is already selected
-      const isAlreadySelected = selectedMeters.some((m) => String(m.id) === String(meter.id));
-      
-      if (!isAlreadySelected) {
-        console.log('Adding meter:', meter);
-        onMeterSelect(meter);
-        onMeterParametersInit(meter.id);
-      } else {
-        console.log('Meter already selected:', meter);
-      }
-    } else {
-      console.log('Meter not found with ID:', meterId);
+    // Cleanup function to abort fetch on unmount or re-fetch
+    return () => {
+      abortController.abort();
+    };
+  }, []); // Empty deps array since we only want to fetch once
+
+  const handleMeterAdd = useCallback((meter) => {
+    const isAlreadySelected = selectedMeters.some(
+      (m) => String(m.id) === String(meter.id)
+    );
+
+    if (!isAlreadySelected) {
+      onMeterSelect(meter);
+      onMeterParametersInit(meter.id);
     }
-  };
+  }, [selectedMeters, onMeterSelect, onMeterParametersInit]);
+
+  // Memoize filtered meters to prevent unnecessary recalculations
+  const availableMeters = useMemo(() => 
+    meters.filter(m => !selectedMeters.some(sm => String(sm.id) === String(m.id))),
+    [meters, selectedMeters]
+  );
 
   if (loading) {
     return (
@@ -71,90 +82,91 @@ const SelectMeters = ({
       </div>
     );
   }
-  const getAvailableMeters = () => {
-    return Array.isArray(meters) 
-      ? meters.filter((m) => !selectedMeters.some((sm) => String(sm.id) === String(m.id))) 
-      : [];
-  };
 
   return (
-    <div className="card">
-      <div className="card-header">
-        <strong className="card-title">Select Meters</strong>
-      </div>
-      <div className="card-body">
-        <div className="form-group">
-          <div className="input-group mb-3">
-            <div className="input-group-prepend">
-              <span className="input-group-text">
-                <i className="fa fa-tachometer"></i>
-              </span>
+    <div className="wizard-content">
+      <div className="card">
+        <div className="card-header">
+          <strong className="card-title">Select Meters</strong>
+        </div>
+        <div className="card-body">
+          <div className="meters-container">
+            <div className="meters-available">
+              <h6 className="mb-3">Available Meters</h6>
+              <SearchableTable
+                data={availableMeters}
+                onSelect={handleMeterAdd}
+              />
             </div>
-            <select
-              className="form-control"
-              onChange={(e) => handleMeterAdd(e.target.value)}
-              value=""
-            >
-              <option value="">Add meter...</option>
-              {getAvailableMeters().map((meter) => (
-                <option key={meter.id} value={meter.id}>
-                  {meter.name} ({meter.type})
-                </option>
-              ))}
-            </select>
+
+            <div className="meters-selected">
+              <h6 className="mb-3">Selected Meters ({selectedMeters.length})</h6>
+              <div className="table-responsive">
+                {selectedMeters.length > 0 ? (
+                  <table className="meters-table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Model</th>
+                        <th>Serial Number</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedMeters.map((meter) => (
+                        <tr key={meter.id} className="meter-item">
+                          <td>{meter.name}</td>
+                          <td>
+                            <span className="badge badge-primary">
+                              {meter.type}
+                            </span>
+                          </td>
+                          <td>{meter.model}</td>
+                          <td>
+                            <code>{meter.serialNumber}</code>
+                          </td>
+                          <td>
+                            <button
+                              className="action-button remove"
+                              onClick={() => onMeterRemove(meter.id)}
+                              data-tooltip="Remove meter"
+                            >
+                              <i className="fa fa-trash"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="text-center text-muted p-4">
+                    <i className="fa fa-info-circle mr-2"></i>
+                    No meters selected. Please select meters from the available list.
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-
-        {selectedMeters.length > 0 ? (
-          <div className="selected-meters">
-            <h6 className="mb-3">Selected Meters</h6>
-            <div className="table-responsive">
-              <table className="table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Model</th>
-                    <th>Serial Number</th>
-                    <th className="text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedMeters.map((meter) => (
-                    <tr key={meter.id}>
-                      <td>{meter.name}</td>
-                      <td>
-                        <span className="badge badge-primary">{meter.type}</span>
-                      </td>
-                      <td>{meter.model}</td>
-                      <td>
-                        <code>{meter.serialNumber}</code>
-                      </td>
-                      <td className="text-right">
-                        <button
-                          type="button"
-                          className="btn btn-danger btn-sm"
-                          onClick={() => onMeterRemove(meter.id)}
-                          title="Remove meter"
-                        >
-                          <i className="fa fa-trash"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center text-muted p-3">
-            <i className="fa fa-info-circle mr-2"></i>
-            No meters selected. Please add meters from the dropdown above.
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
-export default SelectMeters;
+SelectMeters.propTypes = {
+  selectedMeters: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      name: PropTypes.string.isRequired,
+      type: PropTypes.string.isRequired,
+      model: PropTypes.string.isRequired,
+      serialNumber: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  onMeterSelect: PropTypes.func.isRequired,
+  onMeterParametersInit: PropTypes.func.isRequired,
+  onMeterRemove: PropTypes.func.isRequired,
+};
+
+export default React.memo(SelectMeters);

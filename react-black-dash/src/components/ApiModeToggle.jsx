@@ -34,20 +34,8 @@ const ApiModeToggle = () => {
   };
 
   return (
-    <div className="api-mode-toggle" style={{
-      position: 'fixed',
-      bottom: '20px',
-      right: '20px',
-      zIndex: 1000,
-      padding: '10px',
-      background: 'rgba(245, 245, 245, 0.3)',
-      borderRadius: '5px',
-      boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center'
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+    <div className="api-mode-toggle d-flex align-items-center me-4">
+      <div className="d-flex align-items-center gap-2">
         <label className="switch" style={{
           position: 'relative',
           display: 'inline-block',
@@ -73,19 +61,7 @@ const ApiModeToggle = () => {
             bottom: 0,
             backgroundColor: useRealApi ? '#e74c3c' : '#ccc',
             transition: '.4s',
-            borderRadius: '17px',
-            '&:before': {
-              position: 'absolute',
-              content: '""',
-              height: '13px',
-              width: '13px',
-              left: '2px',
-              bottom: '2px',
-              backgroundColor: 'white',
-              transition: '.4s',
-              borderRadius: '50%',
-              transform: useRealApi ? 'translateX(13px)' : 'translateX(0)'
-            }
+            borderRadius: '17px'
           }}>
             <div style={{
               position: 'absolute',
@@ -101,9 +77,8 @@ const ApiModeToggle = () => {
           </span>
         </label>
         <span style={{
-          fontSize: '10px',
-          fontWeight: 'bold',
-          color: '#000000'
+          fontSize: '0.875rem',
+          color: '#ffffff'
         }}>
           Use Real API
         </span>
