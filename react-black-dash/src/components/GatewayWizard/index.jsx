@@ -174,8 +174,12 @@ const GatewayWizard = () => {
           <SelectGateway
             selectedGateway={selectedGateway}
             onSelect={(gateway) => {
+              // Reset all selections when a new gateway is chosen
               setSelectedGateway(gateway);
               setGatewayName(gateway.name);
+              setSelectedSite(null);
+              setSelectedMeters([]);
+              setMeterParams({});
             }}
           />
         );
