@@ -301,7 +301,7 @@ const GatewayWizard = () => {
                         className="close"
                         onClick={() => setIsModalOpen(false)}
                       >
-                        <span aria-hidden="true">&amp;times;</span>
+                        <i className="fas fa-times"></i>
                       </button>
                     </div>
                     <div className="modal-body">
