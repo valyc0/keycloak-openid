@@ -9,20 +9,27 @@ import {
  * Component that allows toggling between real API and mock API
  */
 const ApiModeToggle = () => {
-  const [isMockEnabled, setIsMockEnabled] = useState(false); // Start with real API
+  const [useRealApi, setUseRealApi] = useState(import.meta.env.VITE_USE_FAKE_BACKEND !== 'true');
   const showToggle = import.meta.env.VITE_SHOW_API_TOGGLE === 'true';
+
+  useEffect(() => {
+    // Initialize fake backend if enabled
+    if (!useRealApi) {
+      enableFakeBackend();
+    }
+  }, []);
 
   // Don't render anything if toggle is hidden
   if (!showToggle) return null;
 
   // Toggle API mode when button is clicked
   const handleToggle = () => {
-    if (isMockEnabled) {
-      disableFakeBackend();
-      setIsMockEnabled(false);
-    } else {
+    if (useRealApi) {
       enableFakeBackend();
-      setIsMockEnabled(true);
+      setUseRealApi(false);
+    } else {
+      disableFakeBackend();
+      setUseRealApi(true);
     }
   };
 
@@ -49,7 +56,7 @@ const ApiModeToggle = () => {
         }}>
           <input
             type="checkbox"
-            checked={!isMockEnabled}
+            checked={useRealApi}
             onChange={handleToggle}
             style={{
               opacity: 0,
@@ -64,7 +71,7 @@ const ApiModeToggle = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: isMockEnabled ? '#ccc' : '#e74c3c',
+            backgroundColor: useRealApi ? '#e74c3c' : '#ccc',
             transition: '.4s',
             borderRadius: '17px',
             '&:before': {
@@ -77,7 +84,7 @@ const ApiModeToggle = () => {
               backgroundColor: 'white',
               transition: '.4s',
               borderRadius: '50%',
-              transform: isMockEnabled ? 'translateX(0)' : 'translateX(13px)'
+              transform: useRealApi ? 'translateX(13px)' : 'translateX(0)'
             }
           }}>
             <div style={{
@@ -89,7 +96,7 @@ const ApiModeToggle = () => {
               backgroundColor: 'white',
               transition: '.4s',
               borderRadius: '50%',
-              transform: isMockEnabled ? 'translateX(0)' : 'translateX(13px)'
+              transform: useRealApi ? 'translateX(13px)' : 'translateX(0)'
             }} />
           </span>
         </label>
