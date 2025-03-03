@@ -70,22 +70,22 @@ const SelectGateway = ({
     {
       key: 'name',
       label: 'Gateway Name',
-      style: { width: '30%' }
+      style: { width: '35%' }
     },
     {
       key: 'serial',
       label: 'Serial Number',
-      style: { width: '30%' }
+      style: { width: '35%' }
     },
     {
       key: 'type',
       label: 'Type',
-      style: { width: '20%' }
+      style: { width: '15%' }
     },
     {
       key: 'status',
       label: 'Status',
-      style: { width: '20%' },
+      style: { width: '15%' },
       render: (gateway) => (
         <span className={`badge badge-${gateway.status === 'Online' ? 'success' : 'danger'}`}>
           {gateway.status}

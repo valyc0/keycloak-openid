@@ -9,6 +9,7 @@ import GatewayWizard from './pages/GatewayWizard';
 import Layout from './components/Layout';
 import AuthProvider from './components/AuthProvider';
 import ProtectedRoute from './components/ProtectedRoute';
+import ComingSoon from './components/ComingSoon'; // Import the ComingSoon component
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './App.css';
@@ -62,6 +63,56 @@ function AppRoutes() {
             <ProtectedRoute>
               <Layout>
                 <GatewayWizard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ComingSoon />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ComingSoon />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics/1"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ComingSoon />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics/2"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ComingSoon />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ComingSoon />
               </Layout>
             </ProtectedRoute>
           }

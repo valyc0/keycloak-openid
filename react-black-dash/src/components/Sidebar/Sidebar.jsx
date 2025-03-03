@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './Sidebar.css';
 
@@ -31,8 +31,14 @@ const Sidebar = ({ isCollapsed, isMobile, isSidebarOpen, onToggleSidebar }) => {
     };
   }, [isMobile, onToggleSidebar]);
 
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+
+  const toggleAnalytics = () => {
+    setIsAnalyticsOpen(!isAnalyticsOpen);
+  };
+
   return (
-    <div 
+    <div
       className={`sidebar py-3 ${isCollapsed ? 'collapsed' : ''} ${
         isMobile && isSidebarOpen ? 'mobile-expanded' : ''
       }`}
@@ -105,13 +111,26 @@ const Sidebar = ({ isCollapsed, isMobile, isSidebarOpen, onToggleSidebar }) => {
           <i className="fas fa-user" aria-hidden="true"></i>
           <span>User Profile</span>
         </Link>
-        <Link
-          to="/analytics"
-          className={`nav-link ${location.pathname === '/analytics' ? 'active' : ''}`}
-        >
+        <div className={`nav-link ${location.pathname.startsWith('/analytics') ? 'active' : ''}`} onClick={toggleAnalytics} style={{cursor: 'pointer'}}>
           <i className="fas fa-chart-bar" aria-hidden="true"></i>
           <span>Analytics</span>
-        </Link>
+        </div>
+        {isAnalyticsOpen && (
+          <ul className="nav-item sub-menu">
+            <li><Link
+              to="/analytics/1"
+              className={`nav-link ${location.pathname === '/analytics/1' ? 'active' : ''}`}
+            >
+              <span >Analytics 1</span>
+            </Link></li>
+            <li><Link
+              to="/analytics/2"
+              className={`nav-link ${location.pathname === '/analytics/2' ? 'active' : ''}`}
+            >
+              <span>Analytics 2</span>
+            </Link></li>
+          </ul>
+        )}
         <Link
           to="/settings"
           className={`nav-link ${location.pathname === '/settings' ? 'active' : ''}`}
