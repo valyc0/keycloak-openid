@@ -5,20 +5,35 @@ Questa guida spiega in dettaglio come implementare l'autenticazione utilizzando 
 
 ## Architettura del Sistema
 
-```mermaid
-graph TD
-    A[React Frontend] --> |1. Richiesta Login| B[Keycloak Server]
-    B --> |2. Redirect pagina login| A
-    A --> |3. Credenziali| B
-    B --> |4. Token JWT| A
-    A --> |5. Richiesta API con token| C[Spring Boot Backend]
-    C --> |6. Verifica token con| B
-    C --> |7. Risposta| A
+```
++----------------+     (1) Richiesta Login     +------------------+
+|                | ----------------------->     |                  |
+| React Frontend |                             | Keycloak Server  |
+|                |     (2) Pagina Login        |                  |
+|                | <-----------------------     |                  |
+|                |                             |                  |
+|                |     (3) Credenziali         |                  |
+|                | ----------------------->     |                  |
+|                |                             |                  |
+|                |     (4) Token JWT           |                  |
+|                | <-----------------------     |                  |
+|                |                             |                  |
++----------------+                             +------------------+
+        |                                              ^
+        |                                              |
+        | (5) Richiesta API                           |
+        | con token                                    |
+        v                                              |
++----------------+     (6) Verifica token     +------------------+
+| Spring Boot    | ----------------------->     |                  |
+| Backend        |                             |                  |
+|                |     (7) Risposta            |                  |
++----------------+ <-----------------------     +------------------+
 ```
 
 ## Componenti Principali
 
-### 1. Keycloak Servera
+### 1. Keycloak Server
 - Gestisce l'autenticazione degli utenti
 - Emette token JWT (JSON Web Tokens)
 - Gestisce ruoli e permessi
@@ -151,18 +166,80 @@ public class SecuredController {
 ## Troubleshooting Comuni
 
 1. **Errori CORS**
-   - Configurare correttamente le origini in Keycloak
-   - Impostare header CORS nel backend Spring
+   ```java
+   // Configurazione CORS in Spring Boot
+   @Configuration
+   public class CorsConfig implements WebMvcConfigurer {
+       @Override
+       public void addCorsMappings(CorsRegistry registry) {
+           registry.addMapping("/api/**")
+               .allowedOrigins("http://localhost:3000")
+               .allowedMethods("GET", "POST", "PUT", "DELETE")
+               .allowCredentials(true);
+       }
+   }
+   ```
 
 2. **Token Invalidi**
-   - Verificare la configurazione del realm
+   - Verificare la configurazione del realm in Keycloak
    - Controllare i tempi di scadenza dei token
    - Verificare la sincronizzazione dell'orologio dei server
 
 3. **Problemi di Ruoli**
-   - Controllare la mappatura dei ruoli in Keycloak
-   - Verificare la configurazione dei client
-   - Controllare i token JWT per i claim corretti
+   ```java
+   // Esempio di configurazione ruoli in Spring Boot
+   @Configuration
+   public class KeycloakRoleConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
+       @Override
+       public Collection<GrantedAuthority> convert(Jwt jwt) {
+           Collection<GrantedAuthority> authorities = new ArrayList<>();
+           Map<String, Object> realmAccess = (Map<String, Object>) jwt.getClaims().get("realm_access");
+           if (realmAccess != null && realmAccess.containsKey("roles")) {
+               ((List<String>) realmAccess.get("roles")).forEach(roleName ->
+                   authorities.add(new SimpleGrantedAuthority("ROLE_" + roleName))
+               );
+           }
+           return authorities;
+       }
+   }
+   ```
+
+## Configurazione Keycloak
+
+1. **Creazione Realm**
+   - Accedere alla console di amministrazione
+   - Creare un nuovo realm
+   - Configurare le impostazioni base (nome, token, ecc.)
+
+2. **Configurazione Client**
+   - Nome: react-client
+   - Client Protocol: openid-connect
+   - Access Type: public
+   - Valid Redirect URIs: http://localhost:3000/*
+   - Web Origins: http://localhost:3000
+
+3. **Gestione Utenti e Ruoli**
+   - Creare ruoli necessari (es: user, admin)
+   - Creare utenti di test
+   - Assegnare ruoli agli utenti
+
+## Note sulla Sicurezza
+
+1. **Gestione Token**
+   - Access Token: durata breve (5-15 minuti)
+   - Refresh Token: durata più lunga (giorni/settimane)
+   - Implementare rotazione dei token
+
+2. **Protezione Endpoint**
+   - Utilizzare HTTPS
+   - Validare sempre i token
+   - Implementare rate limiting
+   - Monitorare tentativi di accesso sospetti
+
+3. **Configurazione Frontend**
+   - Sanitizzare input utente
+   - Proteggere contro XSS
+   - Implementare CSP headers
 
 ## Conclusione
 L'integrazione tra React, Keycloak e Spring Boot fornisce un sistema di autenticazione robusto e sicuro. La chiave per una implementazione di successo è la corretta configurazione di tutti i componenti e una gestione appropriata del ciclo di vita dei token.
