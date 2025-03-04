@@ -215,7 +215,7 @@ const GatewayWizard = () => {
   };
 
   return (
-    <div className="wizard-container">
+    <div className="wizard-container bg-dark text-white">
       <div className="wizard-nav-sticky">
         <WizardProgress
           step={step}

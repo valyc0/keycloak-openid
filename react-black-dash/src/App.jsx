@@ -9,7 +9,8 @@ import GatewayWizard from './pages/GatewayWizard';
 import Layout from './components/Layout';
 import AuthProvider from './components/AuthProvider';
 import ProtectedRoute from './components/ProtectedRoute';
-import ComingSoon from './components/ComingSoon'; // Import the ComingSoon component
+import ComingSoon from './components/ComingSoon';
+import { ToastProvider } from './components/Toast/ToastContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './App.css';
@@ -124,9 +125,11 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 

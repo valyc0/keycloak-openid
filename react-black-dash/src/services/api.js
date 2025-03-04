@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { authTokenManager } from './authTokenManager';
 import { setupFakeBackend } from './FakeBackendInterceptor';
+import { showGlobalToast } from '../hooks/useGlobalToast';
 
 /**
  * API Configuration and Service Module
@@ -131,8 +132,24 @@ api.interceptors.response.use(
         data: error.response.data,
         endpoint: error.config.url,
         headers: error.response.headers,
-        hasAuthToken: !!error.config.headers['Authorization'] // Log if request had auth token
+        hasAuthToken: !!error.config.headers['Authorization']
       });
+
+      // Gestione specifica per errore 401 Unauthorized
+      if (error.response.status === 401) {
+        // Modifica l'errore per includere un messaggio più descrittivo
+        error.isAuthError = true;
+        const errorMessage = `Error ${error.response.status}: ${error.response.data?.error || error.response.data?.message || "Unauthorized - Token non valido"}`;
+        
+        // Mostra il messaggio di errore come errore critico
+        console.error('[API Error]', errorMessage);
+        showGlobalToast(errorMessage, 'error');
+        
+        // Aspetta che il toast sia visualizzato prima di pulire il token
+        setTimeout(() => {
+          authTokenManager.clearToken();
+        }, 2000);
+      }
     } else if (error.request) {
       // Request made but no response received
       console.error('[API Error] No response received:', error.request);
