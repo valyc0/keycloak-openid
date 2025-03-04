@@ -235,6 +235,17 @@ export const alarmService = {
       params: { field, query }
     });
     return response.data;
+  },
+
+  async getAllForExport(filters = {}) {
+    const response = await api.get('/alarms', {
+      params: {
+        ...filters,
+        pageSize: 999999, // Large number to get all records
+        page: 1
+      }
+    });
+    return response.data?.data || [];
   }
 };
 

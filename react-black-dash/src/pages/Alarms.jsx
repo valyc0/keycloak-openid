@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../components/AuthProvider';
 import { alarmService } from '../services/api';
+import * as XLSX from 'xlsx';
 import CreateGenericModal from '../components/GenericCrud/CreateGenericModal';
 import GenericTable from '../components/GenericCrud/GenericTable';
 import GenericFilters from '../components/GenericCrud/GenericFilters';
@@ -97,6 +98,38 @@ const Alarms = () => {
 
   const handleShowSuggestionsChange = (field, show) => {
     setShowSuggestions(prev => ({ ...prev, [field]: show }));
+  };
+
+  const handleExportToExcel = async () => {
+    setIsLoading(true);
+    try {
+      const data = await alarmService.getAllForExport(filters);
+      
+      // Create workbook and worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(data.map(item => ({
+        ID: item.id,
+        'Caller Number': item.caller_number,
+        'Callee Number': item.callee_number,
+        'Call Type': item.callType,
+        'Carrier': item.carrier,
+        'Duration (s)': item.duration_seconds,
+        'Charge ($)': item.charge_amount,
+        'Status': item.status,
+        'Timestamp': item.timestamp
+      })));
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, 'Alarms');
+
+      // Generate & download file
+      XLSX.writeFile(wb, 'alarms_export.xlsx');
+    } catch (err) {
+      console.error('Error exporting data:', err);
+      setError('Failed to export data');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleClearFilters = useCallback(async () => {
@@ -319,10 +352,18 @@ const Alarms = () => {
               onShowSuggestionsChange={handleShowSuggestionsChange}
               onClearFilters={handleClearFilters}
             />
-            <div className="mt-3 mb-3">
+            <div className="mt-3 mb-3 d-flex align-items-center gap-3">
               <div className="text-white">
                 <strong>Total Records:</strong> {totalAlarms}
               </div>
+              <button
+                className="btn btn-sm btn-light"
+                onClick={handleExportToExcel}
+                disabled={isLoading}
+                title="Export filtered data to Excel"
+              >
+                {isLoading ? 'Exporting...' : 'Export to Excel'} <i className="ti-download"></i>
+              </button>
             </div>
             <CreateGenericModal
               isOpen={isModalOpen}
