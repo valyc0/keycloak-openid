@@ -356,14 +356,18 @@ const Alarms = () => {
               <div className="text-white">
                 <strong>Total Records:</strong> {totalAlarms}
               </div>
-              <button
-                className="btn btn-sm btn-light"
+              <img
+                src="/assets/excel-icon.png"
+                alt="Export to Excel"
                 onClick={handleExportToExcel}
-                disabled={isLoading}
+                style={{
+                  width: '23px',
+                  height: '23px',
+                  cursor: 'pointer',
+                  marginLeft: '10px'
+                }}
                 title="Export filtered data to Excel"
-              >
-                {isLoading ? 'Exporting...' : 'Export to Excel'} <i className="ti-download"></i>
-              </button>
+              />
             </div>
             <CreateGenericModal
               isOpen={isModalOpen}
