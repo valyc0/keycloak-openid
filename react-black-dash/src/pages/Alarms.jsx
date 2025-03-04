@@ -319,6 +319,11 @@ const Alarms = () => {
               onShowSuggestionsChange={handleShowSuggestionsChange}
               onClearFilters={handleClearFilters}
             />
+            <div className="mt-3 mb-3">
+              <div className="text-white">
+                <strong>Total Records:</strong> {totalAlarms}
+              </div>
+            </div>
             <CreateGenericModal
               isOpen={isModalOpen}
               title={editingId ? "Edit Alarm" : "Add New Alarm"}
