@@ -1,5 +1,8 @@
 package com.gateway.backend.security;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +23,11 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+
+    @Value("${security.token.validation.enabled:true}")
+    private boolean tokenValidationEnabled;
 
     private final JwtTokenValidator tokenValidator;
 
@@ -60,25 +68,35 @@ public class SecurityConfig {
                     .sameOrigin()))
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .authorizeHttpRequests(auth ->
-                auth
-                    .requestMatchers(h2ConsoleMatcher).permitAll()
-                    .requestMatchers(mvc.pattern("/api/public/**")).permitAll()
-                    .requestMatchers(request -> request.getMethod().equals("OPTIONS")).permitAll()
-                    .anyRequest().authenticated()
-            )
-            .addFilterBefore(
-                new JwtAuthenticationFilter(tokenValidator),
-                UsernamePasswordAuthenticationFilter.class
-            )
-            .exceptionHandling(handling -> handling
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.setContentType("application/json");
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("{\"error\": \"" + authException.getMessage() + "\"}");
-                })
             );
+
+        if (tokenValidationEnabled) {
+            // Configurazione con validazione token
+            http
+                .authorizeHttpRequests(auth ->
+                    auth
+                        .requestMatchers(h2ConsoleMatcher).permitAll()
+                        .requestMatchers(mvc.pattern("/api/public/**")).permitAll()
+                        .requestMatchers(request -> request.getMethod().equals("OPTIONS")).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(
+                    new JwtAuthenticationFilter(tokenValidator),
+                    UsernamePasswordAuthenticationFilter.class
+                )
+                .exceptionHandling(handling -> handling
+                    .authenticationEntryPoint((request, response, authException) -> {
+                        response.setContentType("application/json");
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.getWriter().write("{\"error\": \"" + authException.getMessage() + "\"}");
+                    })
+                );
+        } else {
+            // Bypass completo della sicurezza - permetti tutte le richieste
+            http
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+            logger.info("Token validation is disabled - all requests will be permitted");
+        }
 
         return http.build();
     }

@@ -8,6 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.util.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             logger.info("Processing request to: {} {}", request.getMethod(), request.getRequestURI());
             String jwt = getJwtFromRequest(request);
-
             if (StringUtils.hasText(jwt)) {
                 logger.info("JWT token found in request");
                 if (tokenValidator.validateToken(jwt)) {
