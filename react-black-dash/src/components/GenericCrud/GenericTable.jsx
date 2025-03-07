@@ -131,11 +131,6 @@ const GenericTable = ({
     return pages;
   };
 
-  const renderSortIcon = (column) => {
-    if (sortBy !== column.key) return '↕';
-    return sortOrder === 'asc' ? '↑' : '↓';
-  };
-
   return (
     <div>
       {isLoading && (
@@ -152,12 +147,12 @@ const GenericTable = ({
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  onClick={() => onSort && onSort(column.key)}
+                  onClick={() => column.sortable && onSort && onSort(column.key)}
                   style={{
                     userSelect: 'none',
                     position: 'relative',
-                    paddingRight: '25px',
-                    cursor: onSort ? 'pointer' : 'default',
+                    paddingRight: column.sortable ? '25px' : '12px',
+                    cursor: column.sortable && onSort ? 'pointer' : 'default',
                     ...(getColumnWidth(column) && { style: getColumnWidth(column) })
                   }}
                 >
@@ -165,13 +160,13 @@ const GenericTable = ({
                     className="d-flex align-items-center justify-content-between py-2"
                     style={{
                       width: '100%',
-                      cursor: onSort ? 'pointer' : 'default',
+                      cursor: column.sortable && onSort ? 'pointer' : 'default',
                       userSelect: 'none',
                       transition: 'color 0.2s ease-in-out'
                     }}
                   >
                     <span className="font-weight-bold">{column.label}</span>
-                    {onSort && (
+                    {column.sortable && onSort && (
                       <span
                         className={`ml-2 ${sortBy === column.key ? 'text-primary' : 'text-muted'}`}
                         style={{

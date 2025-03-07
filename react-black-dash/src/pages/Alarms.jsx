@@ -1,305 +1,142 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { useAuth } from '../components/AuthProvider';
 import { alarmService } from '../services/api';
 import * as XLSX from 'xlsx';
 import CreateGenericModal from '../components/GenericCrud/CreateGenericModal';
 import GenericTable from '../components/GenericCrud/GenericTable';
 import GenericFilters from '../components/GenericCrud/GenericFilters';
-import { Alarm } from '../types/models';
+
+// Constants
+const PAGE_SIZE = 10;
+const INITIAL_SORT = { field: 'id', order: 'asc' };
+const ERROR_MESSAGES = {
+  FETCH: 'Failed to fetch alarms. Please try again later.',
+  CREATE: 'Failed to create alarm. Please check your input and try again.',
+  UPDATE: 'Failed to update alarm. Please check your input and try again.',
+  DELETE: 'Failed to delete alarm. Please try again.',
+  EXPORT: 'Failed to export data. Please try again.',
+  OPTIONS: 'Failed to fetch options data. Please try again.'
+};
+
+const initialAlarmState = {
+  caller_number: '',
+  callee_number: '',
+  callType: '',
+  carrier: '',
+  duration_seconds: '',
+  charge_amount: '',
+  status: ''
+};
+
+// Utility functions
+const createSelectOptions = (options = []) => 
+  Array.isArray(options) ? options.map(opt => ({ value: opt, label: opt })) : [];
+
+const formatExcelData = (item) => ({
+  ID: item.id,
+  'Caller Number': item.caller_number,
+  'Callee Number': item.callee_number,
+  'Call Type': item.callType,
+  'Carrier': item.carrier,
+  'Duration (s)': item.duration_seconds,
+  'Charge ($)': item.charge_amount,
+  'Status': item.status,
+  'Timestamp': item.timestamp
+});
 
 const Alarms = () => {
   const auth = useAuth();
-  const [statusOptions, setStatusOptions] = useState([]);
-  const [callTypeOptions, setCallTypeOptions] = useState([]);
-  const [carrierOptions, setCarrierOptions] = useState([]);
-  const [alarms, setAlarms] = useState([]);
-  const [totalAlarms, setTotalAlarms] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState('id');
-  const [sortOrder, setSortOrder] = useState('asc');
-  const [pageSize] = useState(10);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null);
+  
+  // State management with consolidated objects
+  const [options, setOptions] = useState({
+    status: [],
+    callType: [],
+    carrier: []
+  });
+  
+  const [tableState, setTableState] = useState({
+    data: [],
+    total: 0,
+    currentPage: 1,
+    sort: INITIAL_SORT,
+    isLoading: false
+  });
+  
+  const [filterState, setFilterState] = useState({
+    filters: {},
+    searchInputs: {},
+    showSuggestions: {},
+    suggestions: {}
+  });
+  
+  const [formState, setFormState] = useState({
+    isModalOpen: false,
+    editingId: null,
+    newAlarm: initialAlarmState,
+    editForm: initialAlarmState
+  });
+  
   const [error, setError] = useState(null);
-  const [filters, setFilters] = useState({});
-  const [searchInputs, setSearchInputs] = useState({});
-  const [showSuggestions, setShowSuggestions] = useState({});
-  const [suggestions, setSuggestions] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
 
-  const createOptions = options =>
-    Array.isArray(options) ? options.map(opt => ({ value: opt, label: opt })) : [];
-
-  const getFilterFields = () => [
+  // Memoized values
+  const getFilterFields = useMemo(() => [
     { key: 'caller_number', label: 'Caller Number', type: 'text' },
     { key: 'callee_number', label: 'Callee Number', type: 'text' },
     {
       key: 'callType',
       label: 'Call Type',
       type: 'select',
-      options: createOptions(callTypeOptions)
+      options: createSelectOptions(options.callType)
     },
     {
       key: 'carrier',
       label: 'Carrier',
       type: 'select',
-      options: createOptions(carrierOptions)
+      options: createSelectOptions(options.carrier)
     },
     {
       key: 'status',
       label: 'Status',
       type: 'select',
-      options: createOptions(statusOptions)
+      options: createSelectOptions(options.status)
     }
-  ];
+  ], [options]);
 
-  const initialAlarmState = {
-    caller_number: '',
-    callee_number: '',
-    callType: '',
-    carrier: '',
-    duration_seconds: '',
-    charge_amount: '',
-    status: ''
-  };
+  const columns = useMemo(() => [
+    { key: 'id', label: 'ID', sortable: true },
+    { key: 'caller_number', label: 'Caller Number', sortable: true },
+    { key: 'callee_number', label: 'Callee Number', sortable: true },
+    { key: 'callType', label: 'Call Type', sortable: true },
+    { key: 'carrier', label: 'Carrier', sortable: true },
+    { key: 'duration_seconds', label: 'Duration (s)', sortable: true },
+    { key: 'charge_amount', label: 'Charge ($)', sortable: true },
+    { key: 'status', label: 'Status', sortable: true },
+    { key: 'timestamp', label: 'Timestamp', sortable: true }
+  ], []);
 
-  const [newAlarm, setNewAlarm] = useState(initialAlarmState);
-  const [editForm, setEditForm] = useState(initialAlarmState);
-
-  // Filter handling functions
-  const handleSearchInputChange = async (field, value) => {
-    setSearchInputs(prev => ({ ...prev, [field]: value }));
-    try {
-      if (value.trim()) {
-        const suggestionData = await alarmService.getSuggestions({ field, query: value });
-        setSuggestions(prev => ({ ...prev, [field]: suggestionData }));
-      } else {
-        setSuggestions(prev => ({ ...prev, [field]: [] }));
-      }
-    } catch (error) {
-      console.error('Error fetching suggestions:', error);
-      setSuggestions(prev => ({ ...prev, [field]: [] }));
-    }
-  };
-
-  const handleFilterChange = (field, value) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
-    setCurrentPage(1); // Reset to first page when filter changes
-    fetchAlarms({ [field]: value });
-  };
-
-  const handleSuggestionClick = (field, value) => {
-    setSearchInputs(prev => ({ ...prev, [field]: value }));
-    setFilters(prev => ({ ...prev, [field]: value }));
-    setSuggestions(prev => ({ ...prev, [field]: [] }));
-    setCurrentPage(1);
-    fetchAlarms({ [field]: value });
-  };
-
-  const handleShowSuggestionsChange = (field, show) => {
-    setShowSuggestions(prev => ({ ...prev, [field]: show }));
-  };
-
-  const handleExportToExcel = async () => {
-    setIsLoading(true);
-    try {
-      const data = await alarmService.getAllForExport(filters);
-      
-      // Create workbook and worksheet
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(data.map(item => ({
-        ID: item.id,
-        'Caller Number': item.caller_number,
-        'Callee Number': item.callee_number,
-        'Call Type': item.callType,
-        'Carrier': item.carrier,
-        'Duration (s)': item.duration_seconds,
-        'Charge ($)': item.charge_amount,
-        'Status': item.status,
-        'Timestamp': item.timestamp
-      })));
-
-      // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(wb, ws, 'Alarms');
-
-      // Generate & download file
-      XLSX.writeFile(wb, 'alarms_export.xlsx');
-    } catch (err) {
-      console.error('Error exporting data:', err);
-      setError('Failed to export data');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleClearFilters = useCallback(async () => {
-    try {
-      // First fetch with empty filters
-      await fetchAlarms({});
-      
-      // Then clear all states after successful fetch
-      setFilters({});
-      setSearchInputs({});
-      setSuggestions({});
-      setCurrentPage(1);
-      setShowSuggestions({});
-    } catch (err) {
-      console.error('Error clearing filters:', err);
-      setError('Failed to clear filters');
-    }
-  }, []);
-
-  // Fetch alarms data
-  const fetchAlarms = async (newFilters = {}) => {
-    setError(null);
-    setIsLoading(true);
-    const currentFilters = { ...filters, ...newFilters };
-    console.log('Fetching with params:', { currentPage, pageSize, sortBy, sortOrder, filters: currentFilters });
-    try {
-      const response = await alarmService.getAll({
-        page: currentPage,
-        pageSize,
-        sortBy,
-        sortOrder,
-        ...currentFilters
-      });
-      console.log('Raw Response:', response);
-      console.log('Data type:', typeof response);
-      console.log('Response keys:', Object.keys(response));
-      
-      // Ensure we're working with proper JSON
-      let parsedResponse = response;
-      if (typeof response === 'string') {
-        try {
-          parsedResponse = JSON.parse(response);
-        } catch (e) {
-          console.error('Failed to parse response:', e);
-        }
-      }
-      
-      console.log('Parsed Response:', parsedResponse);
-      setAlarms(parsedResponse?.data || []);
-      setTotalAlarms(parsedResponse?.total || 0);
-      setError(null);
-    } catch (err) {
-      setError('Error fetching alarms');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch options data
-  const fetchOptions = async () => {
-    try {
-      const [statusRes, callTypeRes, carrierRes] = await Promise.all([
-        alarmService.getStatuses(),
-        alarmService.getCallTypes(),
-        alarmService.getCarriers()
-      ]);
-      console.log('Raw responses:', { statusRes, callTypeRes, carrierRes });
-      const statuses = statusRes || [];
-      const callTypes = callTypeRes || [];
-      const carriers = carrierRes || [];
-      
-      console.log('Setting options:', { statuses, callTypes, carriers });
-      
-      setStatusOptions(statuses);
-      setCallTypeOptions(callTypes);
-      setCarrierOptions(carriers);
-    } catch (err) {
-      console.error('Error fetching options:', err);
-      setError('Failed to fetch options data');
-    }
-  };
-
-  useEffect(() => {
-    fetchOptions();
-  }, []);
-
-  useEffect(() => {
-    if (auth?.isAuthenticated) {
-      fetchAlarms();
-    }
-  }, [currentPage, sortBy, sortOrder, auth?.isAuthenticated]);
-
-  const handleCreate = async (e) => {
-    e?.preventDefault();
-    try {
-      await alarmService.create({
-        ...newAlarm,
-        duration_seconds: parseInt(newAlarm.duration_seconds),
-        charge_amount: parseFloat(newAlarm.charge_amount)
-      });
-      await fetchAlarms();
-      setNewAlarm(initialAlarmState);
-      setIsModalOpen(false);
-    } catch (err) {
-      console.error('Error creating alarm:', err);
-      setError('Failed to create alarm');
-    }
-  };
-
-  const handleEdit = async (e) => {
-    e?.preventDefault();
-    try {
-      await alarmService.update(editingId, {
-        ...editForm,
-        duration_seconds: parseInt(editForm.duration_seconds),
-        charge_amount: parseFloat(editForm.charge_amount)
-      });
-      await fetchAlarms();
-      setEditingId(null);
-      setIsModalOpen(false);
-    } catch (err) {
-      console.error('Error updating alarm:', err);
-      setError('Failed to update alarm');
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await alarmService.delete(id.toString());
-      await fetchAlarms();
-    } catch (err) {
-      console.error('Error deleting alarm:', err);
-      setError('Failed to delete alarm');
-    }
-  };
-
-  const columns = [
-    { key: 'id', label: 'ID' },
-    { key: 'caller_number', label: 'Caller Number' },
-    { key: 'callee_number', label: 'Callee Number' },
-    { key: 'callType', label: 'Call Type' },
-    { key: 'carrier', label: 'Carrier' },
-    { key: 'duration_seconds', label: 'Duration (s)' },
-    { key: 'charge_amount', label: 'Charge ($)' },
-    { key: 'status', label: 'Status' },
-    { key: 'timestamp', label: 'Timestamp' }
-  ];
-
-  const getFields = () => [
+  const getFormFields = useMemo(() => [
     { name: 'caller_number', label: 'Caller Number', type: 'text', required: true },
     { name: 'callee_number', label: 'Callee Number', type: 'text', required: true },
     {
       name: 'callType',
       label: 'Call Type',
       type: 'select',
-      options: createOptions(callTypeOptions),
+      options: createSelectOptions(options.callType),
       required: true
     },
     {
       name: 'carrier',
       label: 'Carrier',
       type: 'select',
-      options: createOptions(carrierOptions),
+      options: createSelectOptions(options.carrier),
       required: true
     },
     {
       name: 'duration_seconds',
       label: 'Duration (seconds)',
       type: 'number',
+      min: 0,
       required: true
     },
     {
@@ -307,16 +144,168 @@ const Alarms = () => {
       label: 'Charge Amount ($)',
       type: 'number',
       step: '0.01',
+      min: 0,
       required: true
     },
     {
       name: 'status',
       label: 'Status',
       type: 'select',
-      options: createOptions(statusOptions),
+      options: createSelectOptions(options.status),
       required: true
     }
-  ];
+  ], [options]);
+
+  // Fetch handlers with improved error handling and loading states
+  const fetchAlarms = useCallback(async (newFilters = {}) => {
+    setError(null);
+    setTableState(prev => ({ ...prev, isLoading: true }));
+    
+    try {
+      const response = await alarmService.getAll({
+        page: tableState.currentPage,
+        pageSize: PAGE_SIZE,
+        sortBy: tableState.sort.field,
+        sortOrder: tableState.sort.order,
+        ...filterState.filters,
+        ...newFilters
+      });
+
+      const parsedResponse = typeof response === 'string' ? JSON.parse(response) : response;
+      
+      setTableState(prev => ({
+        ...prev,
+        data: parsedResponse?.data || [],
+        total: parsedResponse?.total || 0,
+        isLoading: false
+      }));
+    } catch (err) {
+      setError(ERROR_MESSAGES.FETCH);
+      console.error('Fetch error:', err);
+      setTableState(prev => ({ ...prev, isLoading: false }));
+    }
+  }, [tableState.currentPage, tableState.sort, filterState.filters]);
+
+  const fetchOptions = useCallback(async () => {
+    try {
+      const [statusRes, callTypeRes, carrierRes] = await Promise.all([
+        alarmService.getStatuses(),
+        alarmService.getCallTypes(),
+        alarmService.getCarriers()
+      ]);
+
+      setOptions({
+        status: statusRes || [],
+        callType: callTypeRes || [],
+        carrier: carrierRes || []
+      });
+    } catch (err) {
+      console.error('Options fetch error:', err);
+      setError(ERROR_MESSAGES.OPTIONS);
+    }
+  }, []);
+
+  // Event handlers with improved error handling
+  const handleSearchInputChange = useCallback(async (field, value) => {
+    setFilterState(prev => ({
+      ...prev,
+      searchInputs: { ...prev.searchInputs, [field]: value }
+    }));
+
+    try {
+      if (value.trim()) {
+        const suggestionData = await alarmService.getSuggestions({ field, query: value });
+        setFilterState(prev => ({
+          ...prev,
+          suggestions: { ...prev.suggestions, [field]: suggestionData }
+        }));
+      } else {
+        setFilterState(prev => ({
+          ...prev,
+          suggestions: { ...prev.suggestions, [field]: [] }
+        }));
+      }
+    } catch (err) {
+      console.error('Suggestions fetch error:', err);
+    }
+  }, []);
+
+  const handleExportToExcel = useCallback(async () => {
+    setTableState(prev => ({ ...prev, isLoading: true }));
+    try {
+      const data = await alarmService.getAllForExport(filterState.filters);
+      
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(data.map(formatExcelData));
+      
+      XLSX.utils.book_append_sheet(wb, ws, 'Alarms');
+      XLSX.writeFile(wb, 'alarms_export.xlsx');
+    } catch (err) {
+      console.error('Export error:', err);
+      setError(ERROR_MESSAGES.EXPORT);
+    } finally {
+      setTableState(prev => ({ ...prev, isLoading: false }));
+    }
+  }, [filterState.filters]);
+
+  const handleFormSubmit = useCallback(async (e) => {
+    e?.preventDefault();
+    const isEditing = !!formState.editingId;
+    const data = isEditing ? formState.editForm : formState.newAlarm;
+
+    try {
+      if (isEditing) {
+        await alarmService.update(formState.editingId, {
+          ...data,
+          duration_seconds: parseInt(data.duration_seconds),
+          charge_amount: parseFloat(data.charge_amount)
+        });
+      } else {
+        await alarmService.create({
+          ...data,
+          duration_seconds: parseInt(data.duration_seconds),
+          charge_amount: parseFloat(data.charge_amount)
+        });
+      }
+
+      await fetchAlarms();
+      setFormState(prev => ({
+        ...prev,
+        isModalOpen: false,
+        editingId: null,
+        newAlarm: initialAlarmState,
+        editForm: initialAlarmState
+      }));
+    } catch (err) {
+      console.error(`${isEditing ? 'Update' : 'Create'} error:`, err);
+      setError(isEditing ? ERROR_MESSAGES.UPDATE : ERROR_MESSAGES.CREATE);
+    }
+  }, [formState, fetchAlarms]);
+
+  // Handle sorting with sortable column check
+  const handleSort = useCallback((key) => {
+    const column = columns.find(col => col.key === key);
+    if (!column?.sortable) return;
+
+    setTableState(prev => ({
+      ...prev,
+      sort: {
+        field: key,
+        order: prev.sort.field === key && prev.sort.order === 'asc' ? 'desc' : 'asc'
+      }
+    }));
+  }, [columns]);
+
+  // Effects
+  useEffect(() => {
+    fetchOptions();
+  }, [fetchOptions]);
+
+  useEffect(() => {
+    if (auth?.isAuthenticated) {
+      fetchAlarms();
+    }
+  }, [auth?.isAuthenticated, fetchAlarms]);
 
   return (
     <div className="row">
@@ -334,27 +323,58 @@ const Alarms = () => {
             <div className="mb-3 d-flex justify-content-between align-items-center">
               <button
                 className="btn btn-primary"
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => setFormState(prev => ({ ...prev, isModalOpen: true }))}
+                disabled={tableState.isLoading}
                 title="Add New Alarm"
               >
                 <i className="ti-plus"></i> Add Alarm
               </button>
             </div>
             <GenericFilters
-              searchInputs={searchInputs}
-              filters={filters}
-              filterFields={getFilterFields()}
-              showSuggestions={showSuggestions}
-              suggestions={suggestions}
+              searchInputs={filterState.searchInputs}
+              filters={filterState.filters}
+              filterFields={getFilterFields}
+              showSuggestions={filterState.showSuggestions}
+              suggestions={filterState.suggestions}
               onSearchInputChange={handleSearchInputChange}
-              onFilterChange={handleFilterChange}
-              onSuggestionClick={handleSuggestionClick}
-              onShowSuggestionsChange={handleShowSuggestionsChange}
-              onClearFilters={handleClearFilters}
+              onFilterChange={(field, value) => {
+                setFilterState(prev => ({
+                  ...prev,
+                  filters: { ...prev.filters, [field]: value }
+                }));
+                setTableState(prev => ({ ...prev, currentPage: 1 }));
+                fetchAlarms({ [field]: value });
+              }}
+              onSuggestionClick={(field, value) => {
+                setFilterState(prev => ({
+                  ...prev,
+                  searchInputs: { ...prev.searchInputs, [field]: value },
+                  filters: { ...prev.filters, [field]: value },
+                  suggestions: { ...prev.suggestions, [field]: [] }
+                }));
+                setTableState(prev => ({ ...prev, currentPage: 1 }));
+                fetchAlarms({ [field]: value });
+              }}
+              onShowSuggestionsChange={(field, show) => {
+                setFilterState(prev => ({
+                  ...prev,
+                  showSuggestions: { ...prev.showSuggestions, [field]: show }
+                }));
+              }}
+              onClearFilters={useCallback(async () => {
+                setFilterState({
+                  filters: {},
+                  searchInputs: {},
+                  showSuggestions: {},
+                  suggestions: {}
+                });
+                setTableState(prev => ({ ...prev, currentPage: 1 }));
+                await fetchAlarms({});
+              }, [fetchAlarms])}
             />
             <div className="mt-3 mb-3 d-flex align-items-center gap-3">
               <div className="text-white">
-                <strong>Total Records:</strong> {totalAlarms}
+                <strong>Total Records:</strong> {tableState.total}
               </div>
               <img
                 src="/assets/excel-icon.png"
@@ -363,64 +383,79 @@ const Alarms = () => {
                 style={{
                   width: '23px',
                   height: '23px',
-                  cursor: 'pointer',
-                  marginLeft: '10px'
+                  cursor: tableState.isLoading ? 'not-allowed' : 'pointer',
+                  marginLeft: '10px',
+                  opacity: tableState.isLoading ? 0.5 : 1
                 }}
                 title="Export filtered data to Excel"
+                disabled={tableState.isLoading}
               />
             </div>
             <CreateGenericModal
-              isOpen={isModalOpen}
-              title={editingId ? "Edit Alarm" : "Add New Alarm"}
-              fields={getFields()}
-              onSubmit={editingId ? handleEdit : handleCreate}
+              isOpen={formState.isModalOpen}
+              title={formState.editingId ? "Edit Alarm" : "Add New Alarm"}
+              fields={getFormFields}
+              onSubmit={handleFormSubmit}
               onClose={() => {
-                setIsModalOpen(false);
-                setNewAlarm(initialAlarmState);
-                setEditingId(null);
+                setFormState(prev => ({
+                  ...prev,
+                  isModalOpen: false,
+                  editingId: null,
+                  newAlarm: initialAlarmState,
+                  editForm: initialAlarmState
+                }));
               }}
-              newGeneric={editingId ? editForm : newAlarm}
+              newGeneric={formState.editingId ? formState.editForm : formState.newAlarm}
               onNewGenericChange={(field, value) => {
-                if (editingId) {
-                  setEditForm(prev => ({
-                    ...prev,
+                setFormState(prev => ({
+                  ...prev,
+                  [formState.editingId ? 'editForm' : 'newAlarm']: {
+                    ...prev[formState.editingId ? 'editForm' : 'newAlarm'],
                     [field]: value
-                  }));
-                } else {
-                  setNewAlarm(prev => ({
-                    ...prev,
-                    [field]: value
-                  }));
-                }
+                  }
+                }));
               }}
             />
             <GenericTable
               columns={columns}
-              data={alarms}
+              data={tableState.data}
               onEdit={(item) => {
-                setEditForm(item);
-                setEditingId(item.id);
-                setIsModalOpen(true);
+                setFormState(prev => ({
+                  ...prev,
+                  editForm: item,
+                  editingId: item.id,
+                  isModalOpen: true
+                }));
               }}
-              onDelete={handleDelete}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              totalItems={totalAlarms}
-              onPageChange={setCurrentPage}
-              sortBy={sortBy}
-              sortOrder={sortOrder}
-              onSort={(key) => {
-                const newOrder = sortBy === key && sortOrder === 'asc' ? 'desc' : 'asc';
-                setSortBy(key);
-                setSortOrder(newOrder);
+              onDelete={async (id) => {
+                try {
+                  await alarmService.delete(id.toString());
+                  await fetchAlarms();
+                } catch (err) {
+                  console.error('Delete error:', err);
+                  setError(ERROR_MESSAGES.DELETE);
+                }
               }}
-              isLoading={isLoading}
+              currentPage={tableState.currentPage}
+              pageSize={PAGE_SIZE}
+              totalItems={tableState.total}
+              onPageChange={(page) => setTableState(prev => ({ ...prev, currentPage: page }))}
+              sortBy={tableState.sort.field}
+              sortOrder={tableState.sort.order}
+              onSort={handleSort}
+              isLoading={tableState.isLoading}
             />
           </div>
         </div>
       </div>
     </div>
   );
+};
+
+Alarms.propTypes = {
+  auth: PropTypes.shape({
+    isAuthenticated: PropTypes.bool
+  })
 };
 
 export default Alarms;
